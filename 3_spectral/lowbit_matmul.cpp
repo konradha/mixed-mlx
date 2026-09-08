@@ -541,6 +541,8 @@ public:
 };
 
 LowbitMatmulEncoderResources::~LowbitMatmulEncoderResources() {
+  if (tensor_residency_set_ != nullptr)
+    tensor_residency_set_->release();
   for (NS::Object *object : objects_) {
     object->release();
   }
@@ -645,6 +647,29 @@ LowbitMatmul::encode(MTL4::ComputeCommandEncoder *encoder,
   resources.retain(right.get());
   resources.retain(output.get());
   resources.retain(table.get());
+  // Tensor views need residency entries in addition to their data buffers.
+  if (resources.tensor_residency_set_ == nullptr) {
+    Owned<MTL::ResidencySetDescriptor> descriptor(
+        MTL::ResidencySetDescriptor::alloc()->init());
+    if (!descriptor) {
+      return make_result(LowbitMatmulStatus::ResourceCreationFailed,
+                         "Cannot allocate a tensor residency descriptor.");
+    }
+    descriptor.get()->setInitialCapacity(kBindingCount);
+    error = nullptr;
+    resources.tensor_residency_set_ =
+        impl_->device->newResidencySet(descriptor.get(), &error);
+    if (resources.tensor_residency_set_ == nullptr) {
+      return make_result(LowbitMatmulStatus::ResourceCreationFailed,
+                         std::string("Cannot create tensor residency set: ") +
+                             error_text(error));
+    }
+  }
+  resources.tensor_residency_set_->addAllocation(left.get());
+  resources.tensor_residency_set_->addAllocation(right.get());
+  resources.tensor_residency_set_->addAllocation(output.get());
+  resources.tensor_residency_set_->commit();
+  command->useResidencySet(resources.tensor_residency_set_);
 
   encoder->setComputePipelineState(impl_->pipeline);
   encoder->setArgumentTable(table.get());
@@ -658,7 +683,8 @@ LowbitMatmul::encode(MTL4::ComputeCommandEncoder *encoder,
 
 LowbitMatmulResult
 LowbitMatmul::encode(MTL4::CommandBuffer *command,
-                     const LowbitMatmulBuffers &buffers) const {
+                     const LowbitMatmulBuffers &buffers,
+                     LowbitMatmulEncoderResources &resources) const {
   if (impl_->state.status != LowbitMatmulStatus::Available)
     return impl_->state;
   auto validation = impl_->validate(command, buffers);
@@ -670,7 +696,6 @@ LowbitMatmul::encode(MTL4::CommandBuffer *command,
     return make_result(LowbitMatmulStatus::EncoderCreationFailed,
                        "Cannot create an MTL4 compute encoder.");
   }
-  LowbitMatmulEncoderResources resources;
   LowbitMatmulResult result = encode(encoder, buffers, resources);
   encoder->endEncoding();
   return result;

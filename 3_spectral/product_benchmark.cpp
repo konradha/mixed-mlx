@@ -411,12 +411,36 @@ double relative_error(const float *x, const std::vector<float> &reference) {
   double difference = 0;
   double scale = 0;
   for (size_t i = 0; i < reference.size(); ++i) {
-    double delta = x[i] - reference[i];
+    double delta = static_cast<double>(x[i]) - reference[i];
     difference += delta * delta;
     scale += static_cast<double>(reference[i]) * reference[i];
   }
   return std::sqrt(difference /
                    std::max(scale, std::numeric_limits<double>::min()));
+}
+double accumulation_error_bound(const std::vector<float> &a,
+                                const std::vector<float> &b,
+                                const std::vector<float> &reference, size_t n) {
+  double left_squared = 0, right_squared = 0, reference_squared = 0;
+  for (size_t i = 0; i < reference.size(); ++i) {
+    left_squared += static_cast<double>(a[i]) * a[i];
+    right_squared += static_cast<double>(b[i]) * b[i];
+    reference_squared += static_cast<double>(reference[i]) * reference[i];
+  }
+  // Allow n FP32 multiplies, n additions and the reference's FP32 rounding.
+  // Include FP64 reference and norm rounding in the mixed-precision gamma.
+  // || |A||B| ||_F <= ||A||_F ||B||_F avoids another cubic reference product.
+  const double u32 = std::numeric_limits<float>::epsilon() / 2.0;
+  const double u64 = std::numeric_limits<double>::epsilon() / 2.0;
+  const double rho =
+      (2.0 * n + 1.0) * u32 + (4.0 * reference.size() + 2.0 * n + 8.0) * u64;
+  if (!(rho < 1.0))
+    throw std::runtime_error(
+        "Matrix order exceeds the FP32 error-bound range.");
+  return rho / (1.0 - rho) *
+         std::sqrt(
+             left_squared * right_squared /
+             std::max(reference_squared, std::numeric_limits<double>::min()));
 }
 Owned<MTL::ResidencySet> residency(Runtime &rt,
                                    const std::vector<MTL::Buffer *> &bs) {
@@ -451,6 +475,7 @@ struct BenchmarkCase {
   Owned<MTL::ResidencySet> residency;
   std::shared_ptr<const std::vector<float>> arithmetic_reference;
   std::shared_ptr<const std::vector<float>> forward_reference;
+  double arithmetic_bound;
   std::function<double(std::string &)> execute;
 };
 
@@ -490,6 +515,13 @@ Errors check_output(const BenchmarkCase &benchmark) {
         benchmark.backend + " " + benchmark.format +
         (benchmark.tile.empty() ? "" : " " + benchmark.tile) +
         " produced an invalid output.");
+  if (arithmetic > benchmark.arithmetic_bound)
+    throw std::runtime_error(
+        benchmark.backend + " " + benchmark.format +
+        (benchmark.tile.empty() ? "" : " " + benchmark.tile) +
+        " arithmetic error " + num(arithmetic, true) +
+        " exceeds FP32 accumulation bound " +
+        num(benchmark.arithmetic_bound, true) + ".");
   return {arithmetic, forward};
 }
 
@@ -600,6 +632,8 @@ int main(int ac, char **av) {
 
     auto forward_reference =
         std::make_shared<const std::vector<float>>(product(a, b, o.n));
+    const double forward_bound =
+        accumulation_error_bound(a, b, *forward_reference, o.n);
     std::vector<BenchmarkCase> cases;
     std::vector<Row> unsupported_rows;
 
@@ -617,6 +651,7 @@ int main(int ac, char **av) {
          {},
          forward_reference,
          forward_reference,
+         forward_bound,
          [&rt, mps, left = fa.get(), right = fb.get(),
           mps_output_buffer](std::string &failure) {
            return rt.mps(
@@ -658,6 +693,7 @@ int main(int ac, char **av) {
                        const std::shared_ptr<Rep> &rep,
                        const std::shared_ptr<const std::vector<float>>
                            &arithmetic_reference,
+                       double arithmetic_bound,
                        const std::string &preparation_failure) {
       auto availability = matmul->availability();
       std::string tile = mpp_tile(matmul->tile());
@@ -686,14 +722,15 @@ int main(int ac, char **av) {
       cases.push_back(
           {"MPP", format.name, std::move(tile), rep->conversion,
            std::move(output_buffer), std::move(resident_set),
-           arithmetic_reference, forward_reference,
+           arithmetic_reference, forward_reference, arithmetic_bound,
            [&rt, operation, rep, output, residency_set](std::string &failure) {
              msqrt::LowbitMatmulBuffers buffers{rep->a.get(),  rep->b.get(),
                                                 rep->as.get(), rep->bs.get(),
                                                 output,        residency_set};
+             msqrt::LowbitMatmulEncoderResources resources;
              return rt.mtl4(
-                 [operation, &buffers](auto *command_buffer) {
-                   return operation->encode(command_buffer, buffers);
+                 [operation, &buffers, &resources](auto *command_buffer) {
+                   return operation->encode(command_buffer, buffers, resources);
                  },
                  failure);
            }});
@@ -703,11 +740,16 @@ int main(int ac, char **av) {
       auto rep = prepare_rep(format, matmuls, any_available(matmuls),
                              preparation_failure);
       std::shared_ptr<const std::vector<float>> arithmetic_reference;
-      if (rep)
+      double arithmetic_bound = 0;
+      if (rep) {
         arithmetic_reference = std::make_shared<const std::vector<float>>(
             product(rep->qa, rep->qb, o.n));
+        arithmetic_bound = accumulation_error_bound(rep->qa, rep->qb,
+                                                    *arithmetic_reference, o.n);
+      }
       for (auto &matmul : matmuls)
-        add_mpp(format, matmul, rep, arithmetic_reference, preparation_failure);
+        add_mpp(format, matmul, rep, arithmetic_reference, arithmetic_bound,
+                preparation_failure);
     };
 
     add_format(FP16, m16);

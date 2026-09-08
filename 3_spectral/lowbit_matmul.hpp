@@ -105,8 +105,7 @@ struct LowbitMatmulBuffers {
 // A data and scale planes therefore use TransposedColumnMajor storage, while B
 // remains ColumnMajor. Query the layouts rather than assuming dense packing.
 //
-// Keeps transient tensor views and argument tables alive until a caller-owned
-// encoder has ended.
+// Keep these tensor views and argument tables alive until GPU work is complete.
 class LowbitMatmulEncoderResources {
 public:
   LowbitMatmulEncoderResources() = default;
@@ -119,6 +118,7 @@ private:
   friend class LowbitMatmul;
   void retain(NS::Object *object);
   std::vector<NS::Object *> objects_;
+  MTL::ResidencySet *tensor_residency_set_ = nullptr;
 };
 
 // The library must contain the matching functions compiled as Metal 4.1. The
@@ -151,11 +151,11 @@ public:
   // tensors on this device. No GPU-family inference or FP32 fallback is used.
   [[nodiscard]] LowbitMatmulResult availability() const;
 
-  // Records exactly one complete FP32 C=A*B operation. The caller retains all
-  // buffers and the residency set through GPU completion.
+  // Records one complete FP32 C=A*B operation. Keep the buffers, residency set,
+  // and resources alive through GPU completion.
   [[nodiscard]] LowbitMatmulResult
-  encode(MTL4::CommandBuffer *command,
-         const LowbitMatmulBuffers &buffers) const;
+  encode(MTL4::CommandBuffer *command, const LowbitMatmulBuffers &buffers,
+         LowbitMatmulEncoderResources &resources) const;
   [[nodiscard]] LowbitMatmulResult
   encode(MTL4::ComputeCommandEncoder *encoder,
          const LowbitMatmulBuffers &buffers,

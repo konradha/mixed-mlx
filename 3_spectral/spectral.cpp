@@ -1140,13 +1140,13 @@ SpectralResult run_spectral(Metal &metal, const Problem &problem,
   auto start = Clock::now();
   double command_seconds = 0.0;
   if (fp16_basis) {
+    LowbitMatmulEncoderResources resources;
     command_seconds = metal.submit_mtl4([&](MTL4::CommandBuffer *command) {
       command->useResidencySet(residency.get());
       MTL4::ComputeCommandEncoder *encoder = command->computeCommandEncoder();
       if (encoder == nullptr) {
         throw std::runtime_error("Cannot create an MTL4 compute encoder.");
       }
-      LowbitMatmulEncoderResources resources;
       MTL4EncoderResources dispatch_resources;
       Metal::dispatch2d(
           encoder, metal.pipeline("scale_columns_f16"), residency.get(),
@@ -1167,13 +1167,13 @@ SpectralResult run_spectral(Metal &metal, const Problem &problem,
       encoder->endEncoding();
     });
   } else if (low_mpp) {
+    LowbitMatmulEncoderResources resources;
     command_seconds = metal.submit_mtl4([&](MTL4::CommandBuffer *command) {
       command->useResidencySet(residency.get());
       MTL4::ComputeCommandEncoder *encoder = command->computeCommandEncoder();
       if (encoder == nullptr) {
         throw std::runtime_error("Cannot create an MTL4 compute encoder.");
       }
-      LowbitMatmulEncoderResources resources;
       MTL4EncoderResources dispatch_resources;
       encode_low_product(encoder, resources, low_scaled_L, low_scaled_Ls,
                          low_inverse_R, low_inverse_Rs, root_product);
@@ -1230,13 +1230,13 @@ SpectralResult run_spectral(Metal &metal, const Problem &problem,
        ++iteration) {
     start = Clock::now();
     if (fp16_basis) {
+      LowbitMatmulEncoderResources resources;
       command_seconds = metal.submit_mtl4([&](MTL4::CommandBuffer *command) {
         command->useResidencySet(residency.get());
         MTL4::ComputeCommandEncoder *encoder = command->computeCommandEncoder();
         if (encoder == nullptr) {
           throw std::runtime_error("Cannot create an MTL4 compute encoder.");
         }
-        LowbitMatmulEncoderResources resources;
         MTL4EncoderResources dispatch_resources;
         encode_mpp_product(encoder, resources, *fp16_fp32, basis_inverse_buffer,
                            residual_f32, workspace);
@@ -1266,13 +1266,13 @@ SpectralResult run_spectral(Metal &metal, const Problem &problem,
         encoder->endEncoding();
       });
     } else if (low_mpp && low_on && measured > 1.0e-3) {
+      LowbitMatmulEncoderResources resources;
       command_seconds = metal.submit_mtl4([&](MTL4::CommandBuffer *command) {
         command->useResidencySet(residency.get());
         MTL4::ComputeCommandEncoder *encoder = command->computeCommandEncoder();
         if (encoder == nullptr) {
           throw std::runtime_error("Cannot create an MTL4 compute encoder.");
         }
-        LowbitMatmulEncoderResources resources;
         MTL4EncoderResources dispatch_resources;
         encode_matrix_codec(metal, encoder, residency.get(), dispatch_resources,
                             plan.basis, residual_f32, low_right, low_right_s,
