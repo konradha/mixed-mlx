@@ -20,6 +20,30 @@
 
 namespace mixed_sqrt {
 
+namespace {
+
+void printUsage(std::ostream &out) {
+  out << "usage: mixed_sqrt [options] [matrix order]\n"
+         "\n"
+         "  --solver-backend metal|accelerate\n"
+         "  --basis-precision <fp32|bf16|fp8_e4m3fn|fp8_e5m2|mxfp8_e4m3fn|"
+         "mxfp8_e5m2|fp4_e2m1|mxfp4_e2m1>\n"
+         "  --spectrum-precision <same formats plus the log variants>\n"
+         "  --correction-mode fp32_reorthogonalized|native_quantized\n"
+         "  --native-dispatch fused|per_stage\n"
+         "  --native-stopping fixed|stagnation\n"
+         "  --kernel-path tiled|legacy\n"
+         "  --rounding nearest|stochastic  --rounding-seed <uint32>\n"
+         "  --orders <a,b,c> --conditions <a,b,c> --sweep [output directory]\n"
+         "  --warmups <n> --evaluations <n>\n"
+         "  --paper-test-set <I..VII> --paper-order <n>\n"
+         "  --adaptive\n"
+         "  --codec-check  --kernel-check\n"
+         "  --help\n";
+}
+
+}  // namespace
+
 int runApplication(int argc, char **argv) {
   SolverBackend solver_backend = SolverBackend::Metal;
   PaperTestSet paper_test_set = PaperTestSet::None;
@@ -52,6 +76,10 @@ int runApplication(int argc, char **argv) {
 
   for (int index = 1; index < argc; ++index) {
     const std::string argument = argv[index];
+    if (argument == "--help" || argument == "-h") {
+      printUsage(std::cout);
+      return EXIT_SUCCESS;
+    }
     const auto take = [&](const char *error) {
       if (++index == argc) {
         fail(error);

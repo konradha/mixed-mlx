@@ -43,8 +43,7 @@ Main options: `--solver-backend metal|accelerate`, `--basis-precision`,
 `--spectrum-precision`, `--correction-mode fp32_reorthogonalized|native_quantized`,
 `--native-dispatch fused|per_stage`, `--rounding nearest|stochastic`,
 `--orders`, `--conditions`, `--warmups`, `--evaluations`, `--sweep`,
-`--codec-check`, `--kernel-check`. There is no `--help`; an unknown option
-prints an error.
+`--codec-check`, `--kernel-check`. Run `--help` for the full list.
 
 `--sweep <dir>` writes `summary.csv` and `iterations.csv` into `<dir>`; the
 default is `metal_benchmark`.
