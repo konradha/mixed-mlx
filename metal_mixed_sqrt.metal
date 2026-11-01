@@ -718,6 +718,11 @@ inline uchar encode_fp4_e2m1(float value) {
   }
 
   const float magnitude = fabs(value);
+  if (magnitude >= 6.0f) {
+    // Beyond the largest code every distance rounds to the same float, so the
+    // scan below cannot separate 6.0 from 0.0. Saturate explicitly.
+    return uchar(sign | 0x07u);
+  }
   uint nearest = 0u;
   float nearest_distance = fabs(magnitude - decode_fp4_e2m1(uchar(nearest)));
   for (uint candidate = 1u; candidate <= 0x07u; ++candidate) {
@@ -1698,7 +1703,13 @@ kernel void log_spectrum_metadata(const device float *spectrum [[buffer(0)]],
     minimum = min(minimum, value);
     maximum = max(maximum, value);
   }
-  metadata[block] = float2(minimum, maximum - minimum);
+  float span = maximum - minimum;
+  if (minimum + span > maximum) {
+    // Decode computes exp2(minimum + span) for the top code. Round the span
+    // down by one ulp so that sum stays at or below the block maximum.
+    span = nextafter(span, 0.0f);
+  }
+  metadata[block] = float2(minimum, span);
 }
 
 inline float normalized_log_spectrum(const device float *spectrum,

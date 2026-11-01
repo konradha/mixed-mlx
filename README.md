@@ -33,7 +33,7 @@ make mixed
 ./build/mixed_sqrt --codec-check
 
 # One small controlled problem, one evaluation.
-./build/mixed_sqrt --orders 32 --conditions 100 --warmups 2 --evaluations 3 --sweep
+./build/mixed_sqrt --orders 32 --conditions 100 --warmups 2 --evaluations 3 --sweep out
 ```
 
 Run from the repository root: `build/mixed_sqrt` loads `metal_mixed_sqrt.metal`
@@ -46,18 +46,16 @@ Main options: `--solver-backend metal|accelerate`, `--basis-precision`,
 `--codec-check`, `--kernel-check`. There is no `--help`; an unknown option
 prints an error.
 
-`--sweep` writes `metal_benchmark/summary.csv` and
-`metal_benchmark/iterations.csv` relative to the working directory. The path
-is not configurable.
+`--sweep <dir>` writes `summary.csv` and `iterations.csv` into `<dir>`; the
+default is `metal_benchmark`.
+
+`make check` builds every target, runs the codec test, both self-checks
+(`--codec-check`, `--kernel-check`) and one quick run of each binary.
 
 ## Known state
 
-- `make check` runs `tests/matrix_codec.cpp` only. The solver, the dispatch
-  fallback rules, and the Metal buffer lifetime code have no automated test.
-- `./build/mixed_sqrt --kernel-check` currently fails. The failing edges are
-  `fp4_e2m1` positive and negative saturation and `log_s` largest finite for
-  `fp8_e4m3fn` and `fp4_e2m1`. Do not read the quantized results as validated
-  until this passes.
+- The solver, the dispatch fallback rules and the Metal buffer lifetime code
+  have no automated test beyond the quick runs in `make check`.
 - `artifacts/` and the plotting script inputs are not in the repository. The
   published figures were generated from local CSV output.
 

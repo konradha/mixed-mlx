@@ -51,6 +51,8 @@ check: export MTL_SHADER_VALIDATION_REPORT_TO_STDERR = 1
 check: export MTL_SHADER_VALIDATION_ABORT_ON_FAULT = 1
 check: all $(BUILD)/matrix_codec_check
 	./$(BUILD)/matrix_codec_check
+	./$(BUILD)/mixed_sqrt --codec-check
+	./$(BUILD)/mixed_sqrt --kernel-check
 	./$(BUILD)/baseline --quick --output $(BUILD)/checks/baseline
 	./$(BUILD)/formats --quick --output $(BUILD)/checks/formats
 	./$(BUILD)/spectral --order 96 --warmups 1 --evaluations 1 --max-corrections 30 --output $(BUILD)/checks/spectral
