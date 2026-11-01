@@ -19,15 +19,16 @@ SPECTRAL_SOURCES := 3_spectral/main.cpp 3_spectral/spectral.cpp 3_spectral/metal
 SPECTRAL_OBJECTS := $(patsubst %.cpp,$(BUILD)/%.o,$(SPECTRAL_SOURCES)) $(BUILD)/3_spectral/mps_matmul.o
 PRODUCT_SOURCES := 3_spectral/product_benchmark.cpp 3_spectral/metal.cpp 3_spectral/mps_matmul.cpp 3_spectral/lowbit_matmul.cpp
 PRODUCT_OBJECTS := $(patsubst %.cpp,$(BUILD)/%.o,$(PRODUCT_SOURCES))
+MIXED_SOURCES := $(wildcard src/*.cpp)
 CHECK_OBJECTS := $(BUILD)/tests/matrix_codec.o $(BUILD)/3_spectral/metal.o $(BUILD)/3_spectral/lowbit_matmul.o $(BUILD)/3_spectral/spectral.o $(BUILD)/3_spectral/mps_matmul.o
 BASELINE_LIBRARY := $(BUILD)/1_baseline/kernels.metallib
 FORMAT_LIBRARY := $(BUILD)/2_formats/kernels.metallib
 SPECTRAL_LIBRARY := $(BUILD)/3_spectral/kernels.metallib
 PRODUCT_LIBRARY := $(BUILD)/3_spectral/products.metallib
 
-.PHONY: all baseline formats spectral products quick check bench toolchain-check clean
+.PHONY: all baseline formats spectral products mixed quick check bench toolchain-check clean
 
-all: baseline formats spectral products
+all: baseline formats spectral products mixed
 
 baseline: $(BUILD)/baseline
 
@@ -36,6 +37,8 @@ formats: $(BUILD)/formats
 spectral: $(BUILD)/spectral
 
 products: $(BUILD)/products
+
+mixed: $(BUILD)/mixed_sqrt
 
 quick: $(BUILD)/baseline $(BUILD)/formats $(BUILD)/spectral
 	./$(BUILD)/baseline --quick --output artifacts/baseline_quick
@@ -77,6 +80,10 @@ $(BUILD)/spectral: $(SPECTRAL_OBJECTS) $(SPECTRAL_LIBRARY)
 
 $(BUILD)/products: $(PRODUCT_OBJECTS) $(PRODUCT_LIBRARY)
 	$(CXX) $(CXXFLAGS) $(filter %.o,$^) $(FRAMEWORKS) -o $@
+
+$(BUILD)/mixed_sqrt: $(MIXED_SOURCES) | toolchain-check
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -Isrc $(MIXED_SOURCES) $(FRAMEWORKS) -o $@
 
 $(BUILD)/matrix_codec_check: $(CHECK_OBJECTS) $(SPECTRAL_LIBRARY)
 	$(CXX) $(CXXFLAGS) $(filter %.o,$^) $(FRAMEWORKS) -o $@

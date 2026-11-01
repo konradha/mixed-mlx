@@ -5,8 +5,10 @@
 !/1_baseline/
 !/2_formats/
 !/3_spectral/
+!/src/
 !/tests/
 !/third_party/
+!/metal_mixed_sqrt.metal
 
 __pycache__/
 *.py
@@ -25,3 +27,7 @@ README*
 !/third_party/metal-cpp/Foundation/
 !/third_party/metal-cpp/Metal/
 !/third_party/metal-cpp/LICENSE.txt
+
+!/README.md
+!/LICENSE
+!/plot_article_showcase.py
