@@ -73,7 +73,7 @@ void print_result(const msqrt::SpectralResult &result) {
             << 1.0e3 * result.complete_solve_seconds << '\n';
 }
 
-} // namespace
+}  // namespace
 
 int main(int argc, char **argv) {
   try {

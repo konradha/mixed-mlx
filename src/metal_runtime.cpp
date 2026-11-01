@@ -34,10 +34,10 @@ std::string errorText(NS::Error *error) {
                           : error->localizedDescription()->utf8String();
 }
 
-} // namespace
+}  // namespace
 
 class MetalRuntime::Impl {
-public:
+ public:
   Impl(const char *shader_path, RoundingMode rounding_mode,
        uint32_t rounding_seed)
       : rounding_mode_(rounding_mode), rounding_seed_(rounding_seed) {
@@ -965,7 +965,7 @@ public:
                      static_cast<double>(measured.matrix_squared));
   }
 
-private:
+ private:
   struct KernelPipelines {
     Precision precision = Precision::Fp32;
     MTL::ComputePipelineState *scale_columns = nullptr;
@@ -1070,8 +1070,9 @@ private:
     }
     if (!precision.requiresQuantizer()) {
       if (temporary_output != nullptr) {
-        fail("Direct-storage raw Metal operations must not use a float "
-             "temporary.");
+        fail(
+            "Direct-storage raw Metal operations must not use a float "
+            "temporary.");
       }
       return;
     }
@@ -1137,22 +1138,22 @@ private:
         continue;
       }
       switch (operation) {
-      case KernelOperation::ScaleColumns:
-        return pipelines.scale_columns;
-      case KernelOperation::Matmul:
-        return pipelines.matmul;
-      case KernelOperation::DiagonalSylvester:
-        return pipelines.diagonal_sylvester;
-      case KernelOperation::ApplySylvesterInverse:
-        return pipelines.apply_sylvester_inverse;
-      case KernelOperation::MatmulTiled:
-        return pipelines.matmul_tiled;
-      case KernelOperation::MatmulTiledScaled:
-        return pipelines.matmul_tiled_scaled;
-      case KernelOperation::DiagonalSylvesterCoalesced:
-        return pipelines.diagonal_sylvester_coalesced;
-      case KernelOperation::Quantize:
-        return pipelines.quantize;
+        case KernelOperation::ScaleColumns:
+          return pipelines.scale_columns;
+        case KernelOperation::Matmul:
+          return pipelines.matmul;
+        case KernelOperation::DiagonalSylvester:
+          return pipelines.diagonal_sylvester;
+        case KernelOperation::ApplySylvesterInverse:
+          return pipelines.apply_sylvester_inverse;
+        case KernelOperation::MatmulTiled:
+          return pipelines.matmul_tiled;
+        case KernelOperation::MatmulTiledScaled:
+          return pipelines.matmul_tiled_scaled;
+        case KernelOperation::DiagonalSylvesterCoalesced:
+          return pipelines.diagonal_sylvester_coalesced;
+        case KernelOperation::Quantize:
+          return pipelines.quantize;
       }
     }
     fail("No Metal pipeline loaded for precision: " +
@@ -1236,7 +1237,9 @@ RoundingMode MetalRuntime::roundingMode() const {
   return impl_->roundingMode();
 }
 
-uint32_t MetalRuntime::roundingSeed() const { return impl_->roundingSeed(); }
+uint32_t MetalRuntime::roundingSeed() const {
+  return impl_->roundingSeed();
+}
 
 MTL::Buffer *MetalRuntime::makeSharedBuffer(size_t bytes) const {
   return impl_->makeSharedBuffer(bytes);
@@ -1428,4 +1431,4 @@ void releaseBuffers(const std::vector<MTL::Buffer *> &buffers) {
   }
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

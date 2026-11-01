@@ -4,4 +4,4 @@ namespace mixed_sqrt {
 
 int runApplication(int argc, char **argv);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

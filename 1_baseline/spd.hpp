@@ -54,4 +54,4 @@ Run accelerate_mixed(const Problem &problem, std::size_t max_corrections = 12,
 Run accelerate_schur(const Problem &problem);
 void write_runs(const std::string &directory, const std::vector<Run> &runs);
 
-} // namespace msqrt
+}  // namespace msqrt

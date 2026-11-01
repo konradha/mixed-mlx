@@ -60,7 +60,7 @@ void print_result(const msqrt::FormatResult &result) {
             << result.roundtrip_gib_per_second << '\n';
 }
 
-} // namespace
+}  // namespace
 
 int main(int argc, char **argv) {
   try {

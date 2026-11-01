@@ -32,7 +32,9 @@ struct WorkingHost {
   float low;
 };
 
-double elapsed(Clock::time_point start) { return common::elapsed(start); }
+double elapsed(Clock::time_point start) {
+  return common::elapsed(start);
+}
 
 std::uint32_t checked_order(std::size_t order) {
   if (order == 0) {
@@ -84,7 +86,7 @@ double measured_residual(MTL::Buffer *norm) {
                    static_cast<double>(value.matrix_squared));
 }
 
-} // namespace
+}  // namespace
 
 GpuFactor shared_eigen(const Problem &problem) {
   const std::size_t count = problem.order * problem.order;
@@ -270,4 +272,4 @@ Run metal_fp32(Metal &metal, const Problem &problem,
   return run;
 }
 
-} // namespace msqrt
+}  // namespace msqrt

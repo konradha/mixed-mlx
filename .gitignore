@@ -31,3 +31,4 @@ README*
 !/README.md
 !/LICENSE
 !/plot_article_showcase.py
+!/.clang-format

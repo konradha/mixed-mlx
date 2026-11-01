@@ -70,7 +70,7 @@ int runSweep(MetalRuntime &metal, const MetalSolverConfiguration &configuration,
   return EXIT_SUCCESS;
 }
 
-} // namespace
+}  // namespace
 
 int runMetal(const MetalRunOptions &options,
              const PreparedMatrix *paper_matrix_pointer) {
@@ -118,4 +118,4 @@ int runMetal(const MetalRunOptions &options,
   return EXIT_SUCCESS;
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

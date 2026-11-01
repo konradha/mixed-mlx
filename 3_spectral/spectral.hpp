@@ -87,4 +87,4 @@ SpectralResult run_spectral(Metal &metal, const Problem &problem,
 void write_spectral_results(const std::string &directory,
                             const std::vector<SpectralResult> &results);
 
-} // namespace msqrt
+}  // namespace msqrt

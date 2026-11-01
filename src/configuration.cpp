@@ -76,7 +76,7 @@ constexpr std::pair<NativeDispatchPolicy, const char *>
         {NativeDispatchPolicy::Fused, "fused"},
 };
 
-} // namespace
+}  // namespace
 
 const char *roundingModeName(RoundingMode mode) {
   return enumName(mode, rounding_names, "Unknown rounding mode.");
@@ -254,18 +254,18 @@ bool paperTestSetIsSymmetric(PaperTestSet test_set) {
 
 size_t paperTestSetOrder(PaperTestSet test_set) {
   switch (test_set) {
-  case PaperTestSet::I:
-  case PaperTestSet::II:
-    return 2048;
-  case PaperTestSet::III:
-  case PaperTestSet::IV:
-  case PaperTestSet::V:
-  case PaperTestSet::VI:
-    return 4096;
-  case PaperTestSet::VII:
-    return 1024;
-  case PaperTestSet::None:
-    fail("The controlled matrix family does not have a paper order.");
+    case PaperTestSet::I:
+    case PaperTestSet::II:
+      return 2048;
+    case PaperTestSet::III:
+    case PaperTestSet::IV:
+    case PaperTestSet::V:
+    case PaperTestSet::VI:
+      return 4096;
+    case PaperTestSet::VII:
+      return 1024;
+    case PaperTestSet::None:
+      fail("The controlled matrix family does not have a paper order.");
   }
   fail("Unknown paper test set.");
 }
@@ -293,8 +293,9 @@ void validateNativeStoppingPolicy(CorrectionMode correction_mode,
                                   NativeStoppingPolicy stopping_policy) {
   if (stopping_policy == NativeStoppingPolicy::Stagnation &&
       correction_mode != CorrectionMode::NativeQuantized) {
-    fail("--native-stopping stagnation requires --correction-mode "
-         "native_quantized.");
+    fail(
+        "--native-stopping stagnation requires --correction-mode "
+        "native_quantized.");
   }
 }
 
@@ -312,8 +313,9 @@ void validateNativeDispatchPolicy(CorrectionMode correction_mode,
                                   NativeDispatchPolicy dispatch_policy) {
   if (dispatch_policy == NativeDispatchPolicy::PerStage &&
       correction_mode != CorrectionMode::NativeQuantized) {
-    fail("--native-dispatch per_stage requires --correction-mode "
-         "native_quantized.");
+    fail(
+        "--native-dispatch per_stage requires --correction-mode "
+        "native_quantized.");
   }
 }
 
@@ -329,16 +331,18 @@ void validateCorrectionMode(CorrectionMode mode, Precision basis_precision,
     fail("Native quantized correction does not support log-spectrum storage.");
   }
   if (basis_precision != spectrum_precision) {
-    fail("Native quantized correction requires matching basis and spectrum "
-         "precisions.");
+    fail(
+        "Native quantized correction requires matching basis and spectrum "
+        "precisions.");
   }
   if (kernel_path != KernelPath::Legacy) {
     fail("Native quantized correction requires the legacy kernel path.");
   }
   if (!usesQuantizedFactorFp32Correction(basis_precision)) {
-    fail("Native quantized correction supports FP8 E4M3FN, FP8 E5M2, MXFP8 "
-         "E4M3FN, MXFP8 E5M2, FP4 E2M1, or MXFP4 E2M1 storage.");
+    fail(
+        "Native quantized correction supports FP8 E4M3FN, FP8 E5M2, MXFP8 "
+        "E4M3FN, MXFP8 E5M2, FP4 E2M1, or MXFP4 E2M1 storage.");
   }
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

@@ -18,4 +18,4 @@ GpuFactor shared_eigen(const Problem &problem);
 Run metal_fp32(Metal &metal, const Problem &problem,
                std::size_t max_corrections = 12, double tolerance = 1.0e-12);
 
-} // namespace msqrt
+}  // namespace msqrt

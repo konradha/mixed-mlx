@@ -94,4 +94,4 @@ std::vector<double> parseConditions(const std::string &text) {
   return conditions;
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

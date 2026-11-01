@@ -56,7 +56,6 @@ std::vector<float> source_matrix(std::size_t order) {
       source[row + column * order] = value;
     }
   }
-  // Row and column zero exercise zero scales in both native orientations.
   const float boundaries[] = {
       -0.0f,
       std::ldexp(1.0f, -25),
@@ -225,8 +224,6 @@ std::size_t check_products(msqrt::Metal &metal, std::size_t order) {
           (static_cast<int>(
                (13 * row + 7 * column + row / 32 + 3 * (column / 32)) % 9) -
            4);
-  // A signed permutation selects one exact entry of B per output element.
-  // The nonsymmetric pattern also changes across padded 32-element blocks.
   for (std::size_t row = 0; row < order; ++row) {
     const std::size_t selected = (5 * row + 7) % order;
     const float sign = row % 3 == 0 ? -1.0f : 1.0f;
@@ -255,7 +252,6 @@ std::size_t check_products(msqrt::Metal &metal, std::size_t order) {
       std::memset(buffer->contents(), 0, bytes);
       return buffer;
     };
-    // A null format selects the original dense FP32 operand.
     auto *a = left_format ? make(left_layout.data_bytes) : left_source;
     auto *b = right_format ? make(right_layout.data_bytes) : right_source;
     auto *as =
@@ -336,14 +332,13 @@ void check_spectral(msqrt::Metal &metal) {
       throw std::runtime_error(plan.name +
                                " did not reach the spectral residual target: " +
                                std::to_string(result.final_residual));
-    // An adaptive fallback must not hide a zero native initial product.
     if (!(result.initial_error < 1.0))
       throw std::runtime_error(plan.name +
                                " produced an invalid initial spectral root.");
   }
 }
 
-} // namespace
+}  // namespace
 
 int main() {
   auto *pool = NS::AutoreleasePool::alloc()->init();

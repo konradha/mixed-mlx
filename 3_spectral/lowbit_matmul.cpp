@@ -13,8 +13,9 @@ constexpr std::size_t kSimdgroups = 4;
 constexpr std::size_t kLowbitStrideBytes = 128;
 constexpr std::size_t kScaleBlock = 32;
 
-template <typename T> class Owned {
-public:
+template <typename T>
+class Owned {
+ public:
   Owned() = default;
   explicit Owned(T *value) : value_(value) {}
   ~Owned() {
@@ -36,7 +37,7 @@ public:
   T *get() const noexcept { return value_; }
   explicit operator bool() const noexcept { return value_ != nullptr; }
 
-private:
+ private:
   T *value_ = nullptr;
 };
 
@@ -71,10 +72,10 @@ Owned<MTL::TensorExtents> extents(NS::Integer first, NS::Integer second) {
       MTL::TensorExtents::alloc()->init(2, values));
 }
 
-} // namespace
+}  // namespace
 
 class LowbitMatmul::Impl {
-public:
+ public:
   Impl(MTL::Device *input_device, MTL::Library *input_library,
        std::size_t input_order, LowbitDataType type, LowbitMatmulTile tile)
       : matrix_order(input_order), input_type(type), input_tile(tile) {
@@ -84,37 +85,37 @@ public:
     }
     const char *function_base = nullptr;
     switch (input_type) {
-    case LowbitDataType::Float16:
-      left_bits = right_bits = 16;
-      left_data_type = right_data_type = MTL::TensorDataTypeFloat16;
-      function_base = "lowbit_matmul_fp16";
-      break;
-    case LowbitDataType::Float8E4M3:
-      left_bits = right_bits = 8;
-      left_data_type = right_data_type = MTL::TensorDataTypeMetalFloat8E4M3;
-      function_base = "lowbit_matmul_e4m3";
-      break;
-    case LowbitDataType::Float8E5M2:
-      left_bits = right_bits = 8;
-      left_data_type = right_data_type = MTL::TensorDataTypeMetalFloat8E5M2;
-      function_base = "lowbit_matmul_e5m2";
-      break;
-    case LowbitDataType::MxFloat8E4M3:
-      left_bits = right_bits = 8;
-      left_data_type = right_data_type = MTL::TensorDataTypeMetalFloat8E4M3;
-      function_base = "lowbit_matmul_mxfp8_e4m3";
-      has_scales = true;
-      break;
-    case LowbitDataType::MxFloat4E2M1:
-      left_bits = right_bits = 4;
-      left_data_type = right_data_type = MTL::TensorDataTypeMetalFloat4E2M1;
-      function_base = "lowbit_matmul_mxfp4_e2m1";
-      has_scales = true;
-      break;
-    default:
-      state = make_result(LowbitMatmulStatus::UnsupportedDataType,
-                          "No native MPP kernel exists for this format.");
-      return;
+      case LowbitDataType::Float16:
+        left_bits = right_bits = 16;
+        left_data_type = right_data_type = MTL::TensorDataTypeFloat16;
+        function_base = "lowbit_matmul_fp16";
+        break;
+      case LowbitDataType::Float8E4M3:
+        left_bits = right_bits = 8;
+        left_data_type = right_data_type = MTL::TensorDataTypeMetalFloat8E4M3;
+        function_base = "lowbit_matmul_e4m3";
+        break;
+      case LowbitDataType::Float8E5M2:
+        left_bits = right_bits = 8;
+        left_data_type = right_data_type = MTL::TensorDataTypeMetalFloat8E5M2;
+        function_base = "lowbit_matmul_e5m2";
+        break;
+      case LowbitDataType::MxFloat8E4M3:
+        left_bits = right_bits = 8;
+        left_data_type = right_data_type = MTL::TensorDataTypeMetalFloat8E4M3;
+        function_base = "lowbit_matmul_mxfp8_e4m3";
+        has_scales = true;
+        break;
+      case LowbitDataType::MxFloat4E2M1:
+        left_bits = right_bits = 4;
+        left_data_type = right_data_type = MTL::TensorDataTypeMetalFloat4E2M1;
+        function_base = "lowbit_matmul_mxfp4_e2m1";
+        has_scales = true;
+        break;
+      default:
+        state = make_result(LowbitMatmulStatus::UnsupportedDataType,
+                            "No native MPP kernel exists for this format.");
+        return;
     }
     finish_initialization(function_base);
   }
@@ -122,7 +123,8 @@ public:
   Impl(MTL::Device *input_device, MTL::Library *input_library,
        std::size_t input_order, LowbitMatmulSignature signature,
        LowbitMatmulTile tile)
-      : matrix_order(input_order), input_type(LowbitDataType::Float16),
+      : matrix_order(input_order),
+        input_type(LowbitDataType::Float16),
         input_tile(tile) {
     if (!initialize_device(input_device, input_library) || !validate_order() ||
         !configure_tile()) {
@@ -130,29 +132,29 @@ public:
     }
     const char *function_base = nullptr;
     switch (signature) {
-    case LowbitMatmulSignature::Float16Float16ToFloat32:
-      left_bits = right_bits = 16;
-      left_data_type = right_data_type = MTL::TensorDataTypeFloat16;
-      function_base = "lowbit_matmul_fp16";
-      break;
-    case LowbitMatmulSignature::Float16Float32ToFloat32:
-      left_bits = 16;
-      right_bits = 32;
-      left_data_type = MTL::TensorDataTypeFloat16;
-      right_data_type = MTL::TensorDataTypeFloat32;
-      function_base = "lowbit_matmul_fp16_fp32";
-      break;
-    case LowbitMatmulSignature::Float32Float16ToFloat32:
-      left_bits = 32;
-      right_bits = 16;
-      left_data_type = MTL::TensorDataTypeFloat32;
-      right_data_type = MTL::TensorDataTypeFloat16;
-      function_base = "lowbit_matmul_fp32_fp16";
-      break;
-    default:
-      state = make_result(LowbitMatmulStatus::UnsupportedDataType,
-                          "No native MPP kernel exists for this signature.");
-      return;
+      case LowbitMatmulSignature::Float16Float16ToFloat32:
+        left_bits = right_bits = 16;
+        left_data_type = right_data_type = MTL::TensorDataTypeFloat16;
+        function_base = "lowbit_matmul_fp16";
+        break;
+      case LowbitMatmulSignature::Float16Float32ToFloat32:
+        left_bits = 16;
+        right_bits = 32;
+        left_data_type = MTL::TensorDataTypeFloat16;
+        right_data_type = MTL::TensorDataTypeFloat32;
+        function_base = "lowbit_matmul_fp16_fp32";
+        break;
+      case LowbitMatmulSignature::Float32Float16ToFloat32:
+        left_bits = 32;
+        right_bits = 16;
+        left_data_type = MTL::TensorDataTypeFloat32;
+        right_data_type = MTL::TensorDataTypeFloat16;
+        function_base = "lowbit_matmul_fp32_fp16";
+        break;
+      default:
+        state = make_result(LowbitMatmulStatus::UnsupportedDataType,
+                            "No native MPP kernel exists for this signature.");
+        return;
     }
     finish_initialization(function_base);
   }
@@ -199,25 +201,25 @@ public:
 
   bool configure_tile() {
     switch (input_tile) {
-    case LowbitMatmulTile::Rows32Columns32:
-      tile_rows = 32;
-      tile_columns = 32;
-      tile_suffix = "32x32";
-      return true;
-    case LowbitMatmulTile::Rows64Columns32:
-      tile_rows = 64;
-      tile_columns = 32;
-      tile_suffix = "64x32";
-      return true;
-    case LowbitMatmulTile::Rows64Columns64:
-      tile_rows = 64;
-      tile_columns = 64;
-      tile_suffix = "64x64";
-      return true;
-    default:
-      state = make_result(LowbitMatmulStatus::InvalidArgument,
-                          "Unknown MPP tile configuration.");
-      return false;
+      case LowbitMatmulTile::Rows32Columns32:
+        tile_rows = 32;
+        tile_columns = 32;
+        tile_suffix = "32x32";
+        return true;
+      case LowbitMatmulTile::Rows64Columns32:
+        tile_rows = 64;
+        tile_columns = 32;
+        tile_suffix = "64x32";
+        return true;
+      case LowbitMatmulTile::Rows64Columns64:
+        tile_rows = 64;
+        tile_columns = 64;
+        tile_suffix = "64x64";
+        return true;
+      default:
+        state = make_result(LowbitMatmulStatus::InvalidArgument,
+                            "Unknown MPP tile configuration.");
+        return false;
     }
   }
 
@@ -235,8 +237,8 @@ public:
     }
   }
 
-  LowbitMatmulResult
-  build_data_layout(std::size_t bits, LowbitMatmulOperandLayout &layout) const {
+  LowbitMatmulResult build_data_layout(
+      std::size_t bits, LowbitMatmulOperandLayout &layout) const {
     const std::size_t stride_alignment = bits == 8   ? kLowbitStrideBytes
                                          : bits == 4 ? 2 * kLowbitStrideBytes
                                                      : 1;
@@ -295,10 +297,9 @@ public:
     return make_result(LowbitMatmulStatus::Available, "Layouts are valid.");
   }
 
-  LowbitMatmulResult
-  make_input_descriptor(MTL::TensorDataType data_type,
-                        const LowbitMatmulOperandLayout &layout,
-                        MTL::TensorDescriptor *&descriptor) const {
+  LowbitMatmulResult make_input_descriptor(
+      MTL::TensorDataType data_type, const LowbitMatmulOperandLayout &layout,
+      MTL::TensorDescriptor *&descriptor) const {
     const auto dimension = static_cast<NS::Integer>(matrix_order);
     const auto stride =
         static_cast<NS::Integer>(layout.data_leading_dimension_elements);
@@ -567,7 +568,9 @@ LowbitMatmul::LowbitMatmul(MTL::Device *device, MTL::Library *library,
                            LowbitMatmulTile tile)
     : impl_(std::make_unique<Impl>(device, library, order, signature, tile)) {}
 LowbitMatmul::~LowbitMatmul() = default;
-std::size_t LowbitMatmul::order() const noexcept { return impl_->matrix_order; }
+std::size_t LowbitMatmul::order() const noexcept {
+  return impl_->matrix_order;
+}
 LowbitDataType LowbitMatmul::data_type() const noexcept {
   return impl_->input_type;
 }
@@ -592,12 +595,13 @@ const LowbitMatmulOperandLayout &LowbitMatmul::right_layout() const noexcept {
 std::size_t LowbitMatmul::output_bytes() const noexcept {
   return impl_->output_size;
 }
-LowbitMatmulResult LowbitMatmul::availability() const { return impl_->state; }
+LowbitMatmulResult LowbitMatmul::availability() const {
+  return impl_->state;
+}
 
-LowbitMatmulResult
-LowbitMatmul::encode(MTL4::ComputeCommandEncoder *encoder,
-                     const LowbitMatmulBuffers &buffers,
-                     LowbitMatmulEncoderResources &resources) const {
+LowbitMatmulResult LowbitMatmul::encode(
+    MTL4::ComputeCommandEncoder *encoder, const LowbitMatmulBuffers &buffers,
+    LowbitMatmulEncoderResources &resources) const {
   if (impl_->state.status != LowbitMatmulStatus::Available)
     return impl_->state;
   MTL4::CommandBuffer *command =
@@ -619,9 +623,9 @@ LowbitMatmul::encode(MTL4::ComputeCommandEncoder *encoder,
   Owned<MTL::Tensor> output(
       buffers.output->newTensor(impl_->output_descriptor, 0, &error));
   if (!output) {
-    return make_result(LowbitMatmulStatus::TensorCreationFailed,
-                       std::string("Metal rejected the output tensor: ") +
-                           error_text(error));
+    return make_result(
+        LowbitMatmulStatus::TensorCreationFailed,
+        std::string("Metal rejected the output tensor: ") + error_text(error));
   }
 
   Owned<MTL4::ArgumentTableDescriptor> table_descriptor(
@@ -636,9 +640,9 @@ LowbitMatmul::encode(MTL4::ComputeCommandEncoder *encoder,
   Owned<MTL4::ArgumentTable> table(
       impl_->device->newArgumentTable(table_descriptor.get(), &error));
   if (!table) {
-    return make_result(LowbitMatmulStatus::ResourceCreationFailed,
-                       std::string("Cannot create argument table: ") +
-                           error_text(error));
+    return make_result(
+        LowbitMatmulStatus::ResourceCreationFailed,
+        std::string("Cannot create argument table: ") + error_text(error));
   }
   table.get()->setResource(left.get()->gpuResourceID(), 0);
   table.get()->setResource(right.get()->gpuResourceID(), 1);
@@ -681,10 +685,9 @@ LowbitMatmul::encode(MTL4::ComputeCommandEncoder *encoder,
                      "Encoded native MPP matmul with FP32 output.");
 }
 
-LowbitMatmulResult
-LowbitMatmul::encode(MTL4::CommandBuffer *command,
-                     const LowbitMatmulBuffers &buffers,
-                     LowbitMatmulEncoderResources &resources) const {
+LowbitMatmulResult LowbitMatmul::encode(
+    MTL4::CommandBuffer *command, const LowbitMatmulBuffers &buffers,
+    LowbitMatmulEncoderResources &resources) const {
   if (impl_->state.status != LowbitMatmulStatus::Available)
     return impl_->state;
   auto validation = impl_->validate(command, buffers);
@@ -701,4 +704,4 @@ LowbitMatmul::encode(MTL4::CommandBuffer *command,
   return result;
 }
 
-} // namespace msqrt
+}  // namespace msqrt

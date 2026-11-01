@@ -32,7 +32,7 @@ struct Metrics {
 };
 
 class Generator {
-public:
+ public:
   explicit Generator(std::uint64_t seed) : state_(seed) {}
 
   float uniform() {
@@ -51,26 +51,26 @@ public:
            std::cos(6.283185307179586f * uniform());
   }
 
-private:
+ private:
   std::uint64_t state_;
 };
 
 const char *format_name(Format format) {
   switch (format) {
-  case Format::Fp32:
-    return "fp32";
-  case Format::Fp16:
-    return "fp16";
-  case Format::Bf16:
-    return "bf16";
-  case Format::Fp8E4M3:
-    return "fp8_e4m3";
-  case Format::Fp8E5M2:
-    return "fp8_e5m2";
-  case Format::MxFp8E4M3:
-    return "mxfp8_e4m3";
-  case Format::MxFp4E2M1:
-    return "mxfp4_e2m1";
+    case Format::Fp32:
+      return "fp32";
+    case Format::Fp16:
+      return "fp16";
+    case Format::Bf16:
+      return "bf16";
+    case Format::Fp8E4M3:
+      return "fp8_e4m3";
+    case Format::Fp8E5M2:
+      return "fp8_e5m2";
+    case Format::MxFp8E4M3:
+      return "mxfp8_e4m3";
+    case Format::MxFp4E2M1:
+      return "mxfp4_e2m1";
   }
   throw std::runtime_error("Unknown native format.");
 }
@@ -81,17 +81,17 @@ const char *distribution_name(Distribution distribution) {
 
 std::size_t value_bytes(Format format, std::size_t elements) {
   switch (format) {
-  case Format::Fp32:
-    return 4 * elements;
-  case Format::Fp16:
-  case Format::Bf16:
-    return 2 * elements;
-  case Format::Fp8E4M3:
-  case Format::Fp8E5M2:
-  case Format::MxFp8E4M3:
-    return elements;
-  case Format::MxFp4E2M1:
-    return (elements + 1) / 2;
+    case Format::Fp32:
+      return 4 * elements;
+    case Format::Fp16:
+    case Format::Bf16:
+      return 2 * elements;
+    case Format::Fp8E4M3:
+    case Format::Fp8E5M2:
+    case Format::MxFp8E4M3:
+      return elements;
+    case Format::MxFp4E2M1:
+      return (elements + 1) / 2;
   }
   throw std::runtime_error("Unknown native format.");
 }
@@ -105,51 +105,51 @@ std::size_t scale_bytes(Format format, std::size_t blocks) {
 // bounds. Bits math still uses exact value_bytes.
 std::size_t encoded_alloc_bytes(Format format, std::size_t elements) {
   switch (format) {
-  case Format::Fp8E4M3:
-  case Format::Fp8E5M2:
-  case Format::MxFp8E4M3:
-    return ((elements + 3) / 4) * 4;
-  case Format::MxFp4E2M1:
-    return ((elements + 7) / 8) * 4;
-  default:
-    return value_bytes(format, elements);
+    case Format::Fp8E4M3:
+    case Format::Fp8E5M2:
+    case Format::MxFp8E4M3:
+      return ((elements + 3) / 4) * 4;
+    case Format::MxFp4E2M1:
+      return ((elements + 7) / 8) * 4;
+    default:
+      return value_bytes(format, elements);
   }
 }
 
 const char *encode_kernel(Format format) {
   switch (format) {
-  case Format::Fp32:
-    return "encode_fp32";
-  case Format::Fp16:
-    return "encode_fp16";
-  case Format::Bf16:
-    return "encode_bf16";
-  case Format::Fp8E4M3:
-    return "encode_fp8_e4m3";
-  case Format::Fp8E5M2:
-    return "encode_fp8_e5m2";
-  case Format::MxFp8E4M3:
-  case Format::MxFp4E2M1:
-    throw std::runtime_error("An MX format requires the fused round trip.");
+    case Format::Fp32:
+      return "encode_fp32";
+    case Format::Fp16:
+      return "encode_fp16";
+    case Format::Bf16:
+      return "encode_bf16";
+    case Format::Fp8E4M3:
+      return "encode_fp8_e4m3";
+    case Format::Fp8E5M2:
+      return "encode_fp8_e5m2";
+    case Format::MxFp8E4M3:
+    case Format::MxFp4E2M1:
+      throw std::runtime_error("An MX format requires the fused round trip.");
   }
   __builtin_unreachable();
 }
 
 const char *decode_kernel(Format format) {
   switch (format) {
-  case Format::Fp32:
-    return "decode_fp32";
-  case Format::Fp16:
-    return "decode_fp16";
-  case Format::Bf16:
-    return "decode_bf16";
-  case Format::Fp8E4M3:
-    return "decode_fp8_e4m3";
-  case Format::Fp8E5M2:
-    return "decode_fp8_e5m2";
-  case Format::MxFp8E4M3:
-  case Format::MxFp4E2M1:
-    throw std::runtime_error("An MX format requires the fused round trip.");
+    case Format::Fp32:
+      return "decode_fp32";
+    case Format::Fp16:
+      return "decode_fp16";
+    case Format::Bf16:
+      return "decode_bf16";
+    case Format::Fp8E4M3:
+      return "decode_fp8_e4m3";
+    case Format::Fp8E5M2:
+      return "decode_fp8_e5m2";
+    case Format::MxFp8E4M3:
+    case Format::MxFp4E2M1:
+      throw std::runtime_error("An MX format requires the fused round trip.");
   }
 
   __builtin_unreachable();
@@ -204,7 +204,7 @@ void roundtrip(Metal &metal, MTL::ComputeCommandEncoder *encoder, Format format,
                                 MTL::Size::Make(32, 1, 1));
 }
 
-} // namespace
+}  // namespace
 
 FormatResult measure_format(Metal &metal, Format format,
                             Distribution distribution, std::size_t elements,
@@ -339,4 +339,4 @@ void write_format_results(const std::string &directory,
   }
 }
 
-} // namespace msqrt
+}  // namespace msqrt

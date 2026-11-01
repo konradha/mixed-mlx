@@ -29,4 +29,4 @@ FormatResult measure_format(Metal &metal, Format format,
 void write_format_results(const std::string &directory,
                           const std::vector<FormatResult> &results);
 
-} // namespace msqrt
+}  // namespace msqrt

@@ -11,4 +11,4 @@ using Clock = std::chrono::steady_clock;
 void requireCondition(bool condition, const char *message);
 double elapsedSeconds(const Clock::time_point &start);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

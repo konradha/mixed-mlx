@@ -35,4 +35,4 @@ struct MetalRunOptions {
 int runMetal(const MetalRunOptions &options,
              const PreparedMatrix *paper_matrix_pointer);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

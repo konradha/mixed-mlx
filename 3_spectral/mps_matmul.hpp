@@ -8,7 +8,7 @@
 namespace msqrt {
 
 class MpsMatmul {
-public:
+ public:
   explicit MpsMatmul(MTL::Buffer *buffer, std::size_t order);
   ~MpsMatmul();
   MpsMatmul(const MpsMatmul &) = delete;
@@ -17,9 +17,9 @@ public:
   void encode(MTL::CommandBuffer *command, MTL::Buffer *left,
               MTL::Buffer *right, MTL::Buffer *output) const;
 
-private:
+ private:
   class Impl;
   std::unique_ptr<Impl> impl_;
 };
 
-} // namespace msqrt
+}  // namespace msqrt

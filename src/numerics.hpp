@@ -39,4 +39,4 @@ std::string conditionLabel(double condition);
 PreparedMatrix prepareControlledMatrix(size_t order, double condition);
 PreparedMatrix preparePaperMatrix(PaperTestSet test_set, size_t order);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

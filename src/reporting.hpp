@@ -12,4 +12,4 @@ void writeCaseCsv(const CaseResult &result, std::ofstream &summary,
                   std::ofstream &iterations);
 void writeIterationsHeader(std::ofstream &output);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

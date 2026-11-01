@@ -42,4 +42,4 @@ void addCorrectionFromStorage(const PrecisionSpec &precision,
 double orthogonalityError(const PrecisionSpec &precision,
                           const StorageBuffers &basis, size_t order);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

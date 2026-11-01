@@ -54,14 +54,16 @@ void ssymm(char side, char triangle, size_t order, const float *symmetric,
          &dimension, other, &dimension, &beta, output, &dimension);
 }
 
-template <typename Real> struct RealSchurFactors {
+template <typename Real>
+struct RealSchurFactors {
   std::vector<Real> form;
   std::vector<Real> vectors;
   std::vector<Real> real_eigenvalues;
   std::vector<Real> imaginary_eigenvalues;
 };
 
-template <typename Real> __LAPACK_bool selectNoEigenvalues(Real *, Real *) {
+template <typename Real>
+__LAPACK_bool selectNoEigenvalues(Real *, Real *) {
   return static_cast<__LAPACK_bool>(0);
 }
 
@@ -471,8 +473,8 @@ void solveSchurRecursive(const float *left, size_t leading_left,
 }
 
 template <typename Real>
-std::vector<Real>
-blockedQuasiTriangularSquareRoot(const std::vector<Real> &form, size_t order) {
+std::vector<Real> blockedQuasiTriangularSquareRoot(
+    const std::vector<Real> &form, size_t order) {
   const std::vector<SchurBlock> tiles = schurTiles(form, order);
   std::vector<Real> root(checkedElementCount(order, order), Real{0});
   std::vector<Real> tile_workspace(schur_tile_limit * schur_tile_limit);
@@ -622,7 +624,7 @@ std::vector<double> nonsymmetricReferenceRoot(const std::vector<double> &matrix,
 }
 
 class DeterministicGenerator {
-public:
+ public:
   explicit DeterministicGenerator(uint64_t seed)
       : state_(seed), has_spare_(false) {
     if (state_ == 0) {
@@ -655,7 +657,7 @@ public:
     return radius * std::cos(angle);
   }
 
-private:
+ private:
   uint64_t state_;
   double spare_ = 0.0;
   bool has_spare_;
@@ -1177,4 +1179,4 @@ CaseResult runTimedAccelerateCase(const PreparedMatrix &prepared,
   return result;
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

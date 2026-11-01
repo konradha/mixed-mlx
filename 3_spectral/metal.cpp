@@ -81,7 +81,7 @@ void dispatch_mtl4(MTL4::CommandBuffer *command,
   encoder->endEncoding();
 }
 
-} // namespace
+}  // namespace
 
 MTL4EncoderResources::~MTL4EncoderResources() {
   for (MTL4::ArgumentTable *table : tables_) {
@@ -99,7 +99,7 @@ void MTL4EncoderResources::adopt(MTL4::ArgumentTable *table) {
 }
 
 class Metal::Impl {
-public:
+ public:
   explicit Impl(const std::string &path) {
     device = MTL::CreateSystemDefaultDevice();
     if (device == nullptr) {
@@ -266,8 +266,8 @@ double Metal::submit_mtl4(
   return seconds;
 }
 
-MTL::ResidencySet *
-Metal::residency_set(const std::vector<MTL::Buffer *> &buffers) const {
+MTL::ResidencySet *Metal::residency_set(
+    const std::vector<MTL::Buffer *> &buffers) const {
   MTL::ResidencySetDescriptor *descriptor =
       MTL::ResidencySetDescriptor::alloc()->init();
   if (descriptor == nullptr) {
@@ -294,9 +294,13 @@ Metal::residency_set(const std::vector<MTL::Buffer *> &buffers) const {
   return result;
 }
 
-MTL::Device *Metal::device() const { return impl_->device; }
+MTL::Device *Metal::device() const {
+  return impl_->device;
+}
 
-MTL::Library *Metal::library() const { return impl_->library; }
+MTL::Library *Metal::library() const {
+  return impl_->library;
+}
 
 const char *Metal::device_name() const {
   return impl_->device->name()->utf8String();
@@ -367,4 +371,4 @@ void release_buffers(std::vector<MTL::Buffer *> &buffers) {
   buffers.clear();
 }
 
-} // namespace msqrt
+}  // namespace msqrt

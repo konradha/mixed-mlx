@@ -74,7 +74,9 @@ struct Quantized {
   double bits_per_value = 0.0;
 };
 
-std::size_t elements(std::size_t order) { return common::elements(order); }
+std::size_t elements(std::size_t order) {
+  return common::elements(order);
+}
 
 __LAPACK_int lapack_order(std::size_t order) {
   if (order >
@@ -84,9 +86,13 @@ __LAPACK_int lapack_order(std::size_t order) {
   return static_cast<__LAPACK_int>(order);
 }
 
-std::uint32_t metal_count(std::size_t count) { return common::to_u32(count); }
+std::uint32_t metal_count(std::size_t count) {
+  return common::to_u32(count);
+}
 
-double elapsed(Clock::time_point start) { return common::elapsed(start); }
+double elapsed(Clock::time_point start) {
+  return common::elapsed(start);
+}
 
 void dgemm(char left_transpose, char right_transpose, std::size_t order,
            const double *left, const double *right, double *output) {
@@ -215,7 +221,7 @@ Matrix deterministic_basis(std::size_t order) {
 }
 
 class Generator {
-public:
+ public:
   explicit Generator(std::uint64_t seed) : state_(seed) {}
 
   double uniform() {
@@ -235,7 +241,7 @@ public:
            std::cos(6.283185307179586 * uniform());
   }
 
-private:
+ private:
   std::uint64_t state_;
 };
 
@@ -314,37 +320,37 @@ bool fp16_all_finite(MTL::Buffer *encoded, std::size_t count) {
 
 const char *format_name(FactorFormat format) {
   switch (format) {
-  case FactorFormat::Fp32:
-    return "fp32";
-  case FactorFormat::Fp16:
-    return "fp16";
-  case FactorFormat::Bf16:
-    return "bf16";
-  case FactorFormat::Fp8E4M3:
-    return "fp8_e4m3";
-  case FactorFormat::Fp8E5M2:
-    return "fp8_e5m2";
-  case FactorFormat::MxFp8E4M3:
-    return "mxfp8_e4m3";
-  case FactorFormat::MxFp4E2M1:
-    return "mxfp4_e2m1";
+    case FactorFormat::Fp32:
+      return "fp32";
+    case FactorFormat::Fp16:
+      return "fp16";
+    case FactorFormat::Bf16:
+      return "bf16";
+    case FactorFormat::Fp8E4M3:
+      return "fp8_e4m3";
+    case FactorFormat::Fp8E5M2:
+      return "fp8_e5m2";
+    case FactorFormat::MxFp8E4M3:
+      return "mxfp8_e4m3";
+    case FactorFormat::MxFp4E2M1:
+      return "mxfp4_e2m1";
   }
   throw std::runtime_error("The factor format is unknown.");
 }
 
 std::size_t value_bytes(FactorFormat format, std::size_t count) {
   switch (format) {
-  case FactorFormat::Fp32:
-    return 4 * count;
-  case FactorFormat::Fp16:
-  case FactorFormat::Bf16:
-    return 2 * count;
-  case FactorFormat::Fp8E4M3:
-  case FactorFormat::Fp8E5M2:
-  case FactorFormat::MxFp8E4M3:
-    return count;
-  case FactorFormat::MxFp4E2M1:
-    return (count + 1) / 2;
+    case FactorFormat::Fp32:
+      return 4 * count;
+    case FactorFormat::Fp16:
+    case FactorFormat::Bf16:
+      return 2 * count;
+    case FactorFormat::Fp8E4M3:
+    case FactorFormat::Fp8E5M2:
+    case FactorFormat::MxFp8E4M3:
+      return count;
+    case FactorFormat::MxFp4E2M1:
+      return (count + 1) / 2;
   }
   throw std::runtime_error("The factor format is unknown.");
 }
@@ -353,14 +359,14 @@ std::size_t value_bytes(FactorFormat format, std::size_t count) {
 // last vector load stays in bounds. Bits math still uses exact value_bytes.
 std::size_t encoded_alloc_bytes(FactorFormat format, std::size_t count) {
   switch (format) {
-  case FactorFormat::Fp8E4M3:
-  case FactorFormat::Fp8E5M2:
-  case FactorFormat::MxFp8E4M3:
-    return ((count + 3) / 4) * 4;
-  case FactorFormat::MxFp4E2M1:
-    return ((count + 7) / 8) * 4;
-  default:
-    return value_bytes(format, count);
+    case FactorFormat::Fp8E4M3:
+    case FactorFormat::Fp8E5M2:
+    case FactorFormat::MxFp8E4M3:
+      return ((count + 3) / 4) * 4;
+    case FactorFormat::MxFp4E2M1:
+      return ((count + 7) / 8) * 4;
+    default:
+      return value_bytes(format, count);
   }
 }
 
@@ -378,27 +384,27 @@ void encode_codec(Metal &metal, MTL::ComputeCommandEncoder *encoder,
       format == FactorFormat::MxFp8E4M3 || format == FactorFormat::MxFp4E2M1;
   const char *name = nullptr;
   switch (format) {
-  case FactorFormat::Fp32:
-    name = "encode_fp32";
-    break;
-  case FactorFormat::Fp16:
-    name = "encode_fp16";
-    break;
-  case FactorFormat::Bf16:
-    name = "encode_bf16";
-    break;
-  case FactorFormat::Fp8E4M3:
-    name = "encode_fp8_e4m3";
-    break;
-  case FactorFormat::Fp8E5M2:
-    name = "encode_fp8_e5m2";
-    break;
-  case FactorFormat::MxFp8E4M3:
-    name = "encode_mxfp8_e4m3";
-    break;
-  case FactorFormat::MxFp4E2M1:
-    name = "encode_mxfp4_e2m1";
-    break;
+    case FactorFormat::Fp32:
+      name = "encode_fp32";
+      break;
+    case FactorFormat::Fp16:
+      name = "encode_fp16";
+      break;
+    case FactorFormat::Bf16:
+      name = "encode_bf16";
+      break;
+    case FactorFormat::Fp8E4M3:
+      name = "encode_fp8_e4m3";
+      break;
+    case FactorFormat::Fp8E5M2:
+      name = "encode_fp8_e5m2";
+      break;
+    case FactorFormat::MxFp8E4M3:
+      name = "encode_mxfp8_e4m3";
+      break;
+    case FactorFormat::MxFp4E2M1:
+      name = "encode_mxfp4_e2m1";
+      break;
   }
   MTL::ComputePipelineState *pipeline = metal.pipeline(name);
   encoder->setBuffer(source, 0, 0);
@@ -426,27 +432,27 @@ void decode_codec(Metal &metal, MTL::ComputeCommandEncoder *encoder,
       format == FactorFormat::MxFp8E4M3 || format == FactorFormat::MxFp4E2M1;
   const char *name = nullptr;
   switch (format) {
-  case FactorFormat::Fp32:
-    name = "decode_fp32";
-    break;
-  case FactorFormat::Fp16:
-    name = "decode_fp16";
-    break;
-  case FactorFormat::Bf16:
-    name = "decode_bf16";
-    break;
-  case FactorFormat::Fp8E4M3:
-    name = "decode_fp8_e4m3";
-    break;
-  case FactorFormat::Fp8E5M2:
-    name = "decode_fp8_e5m2";
-    break;
-  case FactorFormat::MxFp8E4M3:
-    name = "decode_mxfp8_e4m3";
-    break;
-  case FactorFormat::MxFp4E2M1:
-    name = "decode_mxfp4_e2m1";
-    break;
+    case FactorFormat::Fp32:
+      name = "decode_fp32";
+      break;
+    case FactorFormat::Fp16:
+      name = "decode_fp16";
+      break;
+    case FactorFormat::Bf16:
+      name = "decode_bf16";
+      break;
+    case FactorFormat::Fp8E4M3:
+      name = "decode_fp8_e4m3";
+      break;
+    case FactorFormat::Fp8E5M2:
+      name = "decode_fp8_e5m2";
+      break;
+    case FactorFormat::MxFp8E4M3:
+      name = "decode_mxfp8_e4m3";
+      break;
+    case FactorFormat::MxFp4E2M1:
+      name = "decode_mxfp4_e2m1";
+      break;
   }
   MTL::ComputePipelineState *pipeline = metal.pipeline(name);
   encoder->setBuffer(encoded, 0, 0);
@@ -467,7 +473,6 @@ void decode_codec(Metal &metal, MTL::ComputeCommandEncoder *encoder,
   }
   Metal::dispatch1d(encoder, pipeline, (params.elements + width - 1) / width);
 }
-// Native low-bit products use the physical layouts reported by LowbitMatmul.
 bool is_low_mpp_basis(FactorFormat format) {
   return format == FactorFormat::Fp8E4M3 || format == FactorFormat::Fp8E5M2 ||
          format == FactorFormat::MxFp8E4M3 || format == FactorFormat::MxFp4E2M1;
@@ -475,31 +480,31 @@ bool is_low_mpp_basis(FactorFormat format) {
 
 LowbitDataType low_datatype(FactorFormat format) {
   switch (format) {
-  case FactorFormat::Fp8E4M3:
-    return LowbitDataType::Float8E4M3;
-  case FactorFormat::Fp8E5M2:
-    return LowbitDataType::Float8E5M2;
-  case FactorFormat::MxFp8E4M3:
-    return LowbitDataType::MxFloat8E4M3;
-  case FactorFormat::MxFp4E2M1:
-    return LowbitDataType::MxFloat4E2M1;
-  default:
-    throw std::runtime_error("No homogeneous MPP type for this basis.");
+    case FactorFormat::Fp8E4M3:
+      return LowbitDataType::Float8E4M3;
+    case FactorFormat::Fp8E5M2:
+      return LowbitDataType::Float8E5M2;
+    case FactorFormat::MxFp8E4M3:
+      return LowbitDataType::MxFloat8E4M3;
+    case FactorFormat::MxFp4E2M1:
+      return LowbitDataType::MxFloat4E2M1;
+    default:
+      throw std::runtime_error("No homogeneous MPP type for this basis.");
   }
 }
 
 const char *low_backend_name(FactorFormat format) {
   switch (format) {
-  case FactorFormat::Fp8E4M3:
-    return "MPP-e4m3-32x32";
-  case FactorFormat::Fp8E5M2:
-    return "MPP-e5m2-32x32";
-  case FactorFormat::MxFp8E4M3:
-    return "MPP-mxfp8-32x32";
-  case FactorFormat::MxFp4E2M1:
-    return "MPP-mxfp4-32x32";
-  default:
-    return "MPP-low-32x32";
+    case FactorFormat::Fp8E4M3:
+      return "MPP-e4m3-32x32";
+    case FactorFormat::Fp8E5M2:
+      return "MPP-e5m2-32x32";
+    case FactorFormat::MxFp8E4M3:
+      return "MPP-mxfp8-32x32";
+    case FactorFormat::MxFp4E2M1:
+      return "MPP-mxfp4-32x32";
+    default:
+      return "MPP-low-32x32";
   }
 }
 
@@ -510,20 +515,20 @@ void encode_matrix_codec(Metal &metal, MTL4::ComputeCommandEncoder *encoder,
                          MTL::Buffer *scales, MTL::Buffer *constants) {
   const char *name = nullptr;
   switch (format) {
-  case FactorFormat::Fp8E4M3:
-    name = "encode_matrix_fp8_e4m3";
-    break;
-  case FactorFormat::Fp8E5M2:
-    name = "encode_matrix_fp8_e5m2";
-    break;
-  case FactorFormat::MxFp8E4M3:
-    name = "encode_matrix_mxfp8_e4m3";
-    break;
-  case FactorFormat::MxFp4E2M1:
-    name = "encode_matrix_mxfp4_e2m1";
-    break;
-  default:
-    throw std::runtime_error("No native matrix codec for this basis.");
+    case FactorFormat::Fp8E4M3:
+      name = "encode_matrix_fp8_e4m3";
+      break;
+    case FactorFormat::Fp8E5M2:
+      name = "encode_matrix_fp8_e5m2";
+      break;
+    case FactorFormat::MxFp8E4M3:
+      name = "encode_matrix_mxfp8_e4m3";
+      break;
+    case FactorFormat::MxFp4E2M1:
+      name = "encode_matrix_mxfp4_e2m1";
+      break;
+    default:
+      throw std::runtime_error("No native matrix codec for this basis.");
   }
   const auto &params =
       *static_cast<const MatrixCodecParams *>(constants->contents());
@@ -691,7 +696,7 @@ double measured_residual(MTL::Buffer *norm) {
                    double{measured.matrix_squared});
 }
 
-} // namespace
+}  // namespace
 
 Problem controlled_problem(std::size_t order, double condition) {
   if (!(condition >= 1.0) || !std::isfinite(condition)) {
@@ -911,7 +916,6 @@ SpectralResult run_spectral(Metal &metal, const Problem &problem,
       return result;
     }
   }
-  // Use the quantized basis transpose for both native and decoded products.
   if (!fp16_basis && plan.basis != FactorFormat::Fp32) {
     for (std::size_t column = 0; column < problem.order; ++column) {
       for (std::size_t row = 0; row < problem.order; ++row) {
@@ -1468,4 +1472,4 @@ void write_spectral_results(const std::string &directory,
   }
 }
 
-} // namespace msqrt
+}  // namespace msqrt

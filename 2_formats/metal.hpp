@@ -11,7 +11,7 @@
 namespace msqrt {
 
 class Metal {
-public:
+ public:
   explicit Metal(const std::string &library_path);
   ~Metal();
   Metal(const Metal &) = delete;
@@ -19,8 +19,8 @@ public:
 
   MTL::Buffer *buffer(std::size_t bytes) const;
   MTL::ComputePipelineState *pipeline(const std::string &name);
-  double
-  submit(const std::function<void(MTL::ComputeCommandEncoder *)> &encode) const;
+  double submit(
+      const std::function<void(MTL::ComputeCommandEncoder *)> &encode) const;
   const char *device_name() const;
 
   static void dispatch1d(MTL::ComputeCommandEncoder *encoder,
@@ -30,11 +30,11 @@ public:
                          MTL::ComputePipelineState *pipeline,
                          std::size_t columns, std::size_t rows);
 
-private:
+ private:
   class Impl;
   std::unique_ptr<Impl> impl_;
 };
 
 void release_buffers(std::vector<MTL::Buffer *> &buffers);
 
-} // namespace msqrt
+}  // namespace msqrt

@@ -49,9 +49,6 @@ inline void run_dense_64x32(ExternalLeft left, ExternalRight right,
                             uint2 position) {
   matmul2d<kDenseMatmul64x32, execution_simdgroups<4>> operation;
 
-  // A column-major host matrix appears transposed through a tensor whose
-  // innermost dimension has stride one. Computing B^T*A^T therefore produces
-  // C^T in the output buffer, which is the column-major representation of A*B.
   auto mpp_left = right.slice(0, position.y * 64);
   auto mpp_right = left.slice(position.x * 32, 0);
   auto destination = output.slice(position.x * 32, position.y * 64);
@@ -86,10 +83,6 @@ inline void run_scaled_64x32(T left, T right,
                              uint2 position) {
   matmul2d<kScaledMatmul64x32, execution_simdgroups<4>> operation;
 
-  // MPP requires a scaled right operand to use transpose_right. The external
-  // left matrix is consequently supplied in transposed-column-major storage;
-  // its tensor view is A, and transpose_right makes the MPP operand A^T.
-  // The external right matrix remains column-major and its tensor view is B^T.
   auto mpp_left = right.slice(0, position.y * 64);
   auto mpp_right = left.slice(0, position.x * 32);
   auto destination = output.slice(position.x * 32, position.y * 64);

@@ -6,8 +6,6 @@
 
 namespace msqrt::common {
 
-// Upper median of a copy. Callers keep per-run records sorted by time and
-// read the median record, so time and error come from the same run.
 template <typename T, typename Time>
 const T &median_run(std::vector<T> &runs, Time time_of) {
   std::sort(runs.begin(), runs.end(), [&](const T &left, const T &right) {
@@ -21,4 +19,4 @@ inline double median_time(std::vector<double> &values) {
   return values[values.size() / 2];
 }
 
-} // namespace msqrt::common
+}  // namespace msqrt::common

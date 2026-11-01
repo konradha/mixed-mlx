@@ -67,7 +67,7 @@ static_assert(sizeof(WorkingNorm) == 2 * sizeof(float));
 static_assert(sizeof(FloatEdgeProbe) == 4 * sizeof(uint32_t));
 
 class MetalRuntime {
-public:
+ public:
   MetalRuntime(const char *shader_path, RoundingMode rounding_mode,
                uint32_t rounding_seed);
   ~MetalRuntime();
@@ -170,11 +170,11 @@ public:
       MTL::Buffer *sylvester_inverse, MTL::Buffer *correction_coordinates,
       MTL::Buffer *correction, uint32_t order) const;
 
-private:
+ private:
   class Impl;
   std::unique_ptr<Impl> impl_;
 };
 
 void releaseBuffers(const std::vector<MTL::Buffer *> &buffers);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

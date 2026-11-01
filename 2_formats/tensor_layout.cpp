@@ -76,4 +76,4 @@ void validate_mx_tensor_layout(MTL::Buffer *values, MTL::Buffer *scales,
   }
 }
 
-} // namespace msqrt
+}  // namespace msqrt

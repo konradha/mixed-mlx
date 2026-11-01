@@ -120,10 +120,10 @@ void checkRawStorageKernels(MetalRuntime &metal) {
                                order);
     const float *correction_values =
         static_cast<const float *>(correction_f32->contents());
-    requireCondition(std::all_of(correction_values,
-                                 correction_values + matrix_elements,
-                                 [](float value) { return value == 1.0f; }),
-                     "Low-factor refinement kernel check failed.");
+    requireCondition(
+        std::all_of(correction_values, correction_values + matrix_elements,
+                    [](float value) { return value == 1.0f; }),
+        "Low-factor refinement kernel check failed.");
     releaseBuffers({roots_f32, workspace_f32, root_f32, residual_f32,
                     inverse_f32, coordinates_f32, correction_f32});
     releaseBuffers(buffers);
@@ -264,9 +264,9 @@ void checkQuantizationEdgeBehavior(MetalRuntime &metal) {
       check(decoded[11] == -edge_spec.maximum, spec.cli_name,
             "negative_infinity");
     }
-    check(edge_spec.preserves_nan ? std::isnan(decoded[12])
-                                  : decoded[12] == 0.0f,
-          spec.cli_name, "nan");
+    check(
+        edge_spec.preserves_nan ? std::isnan(decoded[12]) : decoded[12] == 0.0f,
+        spec.cli_name, "nan");
     std::cout << "edge_check_format=" << spec.cli_name
               << " finite_overflow=" << decoded[8]
               << " positive_infinity=" << decoded[10]
@@ -320,9 +320,9 @@ void checkQuantizationEdgeBehavior(MetalRuntime &metal) {
         static_cast<const uint8_t *>(encoded.scales->contents());
     check(decoded[0] == 1.0f, spec.cli_name, "first_block_maximum");
     check(decoded[32] == 8.0f, spec.cli_name, "second_block_maximum");
-    check(scales[0] ==
-              static_cast<uint8_t>(edge_spec.first_scale_exponent + 127),
-          spec.cli_name, "first_block_scale");
+    check(
+        scales[0] == static_cast<uint8_t>(edge_spec.first_scale_exponent + 127),
+        spec.cli_name, "first_block_scale");
     check(scales[1] ==
               static_cast<uint8_t>(edge_spec.first_scale_exponent + 3 + 127),
           spec.cli_name, "second_block_scale");
@@ -734,7 +734,7 @@ void checkNativeStagedCorrection(MetalRuntime &metal) {
   }
 }
 
-} // namespace
+}  // namespace
 
 void runMetalKernelChecks(MetalRuntime &metal) {
   checkRawStorageKernels(metal);
@@ -746,4 +746,4 @@ void runMetalKernelChecks(MetalRuntime &metal) {
   std::cout << "raw_kernel_checks=passed\n";
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

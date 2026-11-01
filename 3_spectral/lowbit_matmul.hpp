@@ -53,9 +53,7 @@ struct LowbitMatmulResult {
   }
 };
 
-// Storage orientation of one logical input matrix. ColumnMajor stores element
-// (row, column) at row + column*leading_dimension. TransposedColumnMajor stores
-// the logical transpose at column + row*leading_dimension.
+// TransposedColumnMajor stores the logical transpose: column + row*ld.
 enum class LowbitMatrixStorage {
   ColumnMajor,
   TransposedColumnMajor,
@@ -80,54 +78,40 @@ struct MatrixCodecParams {
 };
 
 struct LowbitMatmulBuffers {
-  // Data planes. For MX formats the left plane follows left_layout().storage;
-  // the right plane follows right_layout().storage.
   MTL::Buffer *left = nullptr;
   MTL::Buffer *right = nullptr;
 
-  // Required only for MX formats. Each is a UE8M0 plane with one scale per
-  // 32 contiguous data elements and the row stride reported by the layout.
+  // MX only: UE8M0 scales, one per 32 contiguous data elements.
   MTL::Buffer *left_scales = nullptr;
   MTL::Buffer *right_scales = nullptr;
 
-  // Dense column-major FP32 output, with leading dimension equal to order().
   MTL::Buffer *output = nullptr;
 
-  // MTL4 performs no implicit residency tracking. This set must contain every
-  // non-null buffer above. The caller-owned encoder path requires its command
-  // buffer to use this set before encoder creation.
+  // MTL4 does no implicit residency tracking. Must hold every non-null buffer.
   MTL::ResidencySet *residency_set = nullptr;
 };
 
-// A square product C=A*B with column-major logical matrices and FP32 output.
-// FP16 and raw FP8 inputs use column-major storage for both operands. MPP
-// requires a scaled right operand to be transposed; for MX formats the logical
-// A data and scale planes therefore use TransposedColumnMajor storage, while B
-// remains ColumnMajor. Query the layouts rather than assuming dense packing.
-//
-// Keep these tensor views and argument tables alive until GPU work is complete.
+// MPP needs the scaled right operand transposed, so MX A planes use
+// TransposedColumnMajor and B stays ColumnMajor. Query the layouts.
 class LowbitMatmulEncoderResources {
-public:
+ public:
   LowbitMatmulEncoderResources() = default;
   ~LowbitMatmulEncoderResources();
   LowbitMatmulEncoderResources(const LowbitMatmulEncoderResources &) = delete;
-  LowbitMatmulEncoderResources &
-  operator=(const LowbitMatmulEncoderResources &) = delete;
+  LowbitMatmulEncoderResources &operator=(
+      const LowbitMatmulEncoderResources &) = delete;
 
-private:
+ private:
   friend class LowbitMatmul;
   void retain(NS::Object *object);
   std::vector<NS::Object *> objects_;
   MTL::ResidencySet *tensor_residency_set_ = nullptr;
 };
 
-// The library must contain the matching functions compiled as Metal 4.1. The
-// command buffer must already be between beginCommandBuffer and
-// endCommandBuffer. The command-buffer overload creates and ends one MTL4
-// compute encoder; the encoder overload records into a caller-owned encoder.
+// The command buffer must be open between begin and end.
 
 class LowbitMatmul {
-public:
+ public:
   LowbitMatmul(MTL::Device *device, MTL::Library *library, std::size_t order,
                LowbitDataType data_type, LowbitMatmulTile tile);
   ~LowbitMatmul();
@@ -147,23 +131,19 @@ public:
   [[nodiscard]] const LowbitMatmulOperandLayout &right_layout() const noexcept;
   [[nodiscard]] std::size_t output_bytes() const noexcept;
 
-  // Includes runtime creation of the requested pipeline and representative
-  // tensors on this device. No GPU-family inference or FP32 fallback is used.
   [[nodiscard]] LowbitMatmulResult availability() const;
 
-  // Records one complete FP32 C=A*B operation. Keep the buffers, residency set,
-  // and resources alive through GPU completion.
-  [[nodiscard]] LowbitMatmulResult
-  encode(MTL4::CommandBuffer *command, const LowbitMatmulBuffers &buffers,
-         LowbitMatmulEncoderResources &resources) const;
-  [[nodiscard]] LowbitMatmulResult
-  encode(MTL4::ComputeCommandEncoder *encoder,
-         const LowbitMatmulBuffers &buffers,
-         LowbitMatmulEncoderResources &resources) const;
+  // Keep buffers, residency set and resources alive through completion.
+  [[nodiscard]] LowbitMatmulResult encode(
+      MTL4::CommandBuffer *command, const LowbitMatmulBuffers &buffers,
+      LowbitMatmulEncoderResources &resources) const;
+  [[nodiscard]] LowbitMatmulResult encode(
+      MTL4::ComputeCommandEncoder *encoder, const LowbitMatmulBuffers &buffers,
+      LowbitMatmulEncoderResources &resources) const;
 
-private:
+ private:
   class Impl;
   std::unique_ptr<Impl> impl_;
 };
 
-} // namespace msqrt
+}  // namespace msqrt

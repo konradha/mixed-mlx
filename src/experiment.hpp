@@ -124,4 +124,4 @@ struct CaseResult {
   PhaseTimes times;
 };
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

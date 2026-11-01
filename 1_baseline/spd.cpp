@@ -19,7 +19,9 @@ namespace {
 
 using Clock = common::Clock;
 
-std::size_t elements(std::size_t order) { return common::elements(order); }
+std::size_t elements(std::size_t order) {
+  return common::elements(order);
+}
 
 __LAPACK_int lapack_order(std::size_t order) {
   if (order >
@@ -29,7 +31,9 @@ __LAPACK_int lapack_order(std::size_t order) {
   return static_cast<__LAPACK_int>(order);
 }
 
-double seconds(Clock::time_point start) { return common::elapsed(start); }
+double seconds(Clock::time_point start) {
+  return common::elapsed(start);
+}
 
 void dgemm(char ta, char tb, std::size_t n, const double *a, const double *b,
            double *c) {
@@ -131,7 +135,7 @@ Matrix deterministic_basis(std::size_t order) {
 }
 
 class Generator {
-public:
+ public:
   explicit Generator(std::uint64_t seed) : state_(seed) {}
 
   double uniform() {
@@ -157,7 +161,7 @@ public:
     return radius * std::cos(angle);
   }
 
-private:
+ private:
   std::uint64_t state_;
   bool has_spare_ = false;
   double spare_ = 0.0;
@@ -195,7 +199,7 @@ void validate_positive(const std::vector<float> &values) {
   }
 }
 
-} // namespace
+}  // namespace
 
 Problem controlled_problem(std::size_t order, double condition) {
   if (!(condition >= 1.0) || !std::isfinite(condition)) {
@@ -542,4 +546,4 @@ void write_runs(const std::string &directory, const std::vector<Run> &runs) {
   }
 }
 
-} // namespace msqrt
+}  // namespace msqrt

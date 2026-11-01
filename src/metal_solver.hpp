@@ -41,4 +41,4 @@ CaseResult runTimedMetalCase(MetalRuntime &metal,
                              const MetalProblem &problem, size_t warmups,
                              size_t evaluations);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

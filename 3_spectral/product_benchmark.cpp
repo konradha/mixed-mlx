@@ -25,10 +25,11 @@
 
 namespace {
 using Clock = std::chrono::steady_clock;
-template <class T> class Owned {
+template <class T>
+class Owned {
   T *p_ = nullptr;
 
-public:
+ public:
   Owned() = default;
   explicit Owned(T *p) : p_(p) {}
   ~Owned() {
@@ -120,7 +121,7 @@ class Runtime {
   MTL::Library *l_ = nullptr;
   std::vector<std::pair<std::string, MTL::ComputePipelineState *>> ps_;
 
-public:
+ public:
   Runtime() {
     d_ = MTL::CreateSystemDefaultDevice();
     if (!d_)
@@ -428,7 +429,6 @@ double accumulation_error_bound(const std::vector<float> &a,
     reference_squared += static_cast<double>(reference[i]) * reference[i];
   }
   // Allow n FP32 multiplies, n additions and the reference's FP32 rounding.
-  // Include FP64 reference and norm rounding in the mixed-precision gamma.
   // || |A||B| ||_F <= ||A||_F ||B||_F avoids another cubic reference product.
   const double u32 = std::numeric_limits<float>::epsilon() / 2.0;
   const double u64 = std::numeric_limits<double>::epsilon() / 2.0;
@@ -458,12 +458,12 @@ Owned<MTL::ResidencySet> residency(Runtime &rt,
 }
 const char *mpp_tile(msqrt::LowbitMatmulTile tile) {
   switch (tile) {
-  case msqrt::LowbitMatmulTile::Rows32Columns32:
-    return "32x32";
-  case msqrt::LowbitMatmulTile::Rows64Columns32:
-    return "64x32";
-  case msqrt::LowbitMatmulTile::Rows64Columns64:
-    return "64x64";
+    case msqrt::LowbitMatmulTile::Rows32Columns32:
+      return "32x32";
+    case msqrt::LowbitMatmulTile::Rows64Columns32:
+      return "64x32";
+    case msqrt::LowbitMatmulTile::Rows64Columns64:
+      return "64x64";
   }
   throw std::logic_error("Unknown MPP tile configuration.");
 }
@@ -590,7 +590,7 @@ void output(const Opt &o, const std::vector<Row> &rows) {
       << "arithmetic_error = ||C - Q(A)Q(B)||_F / ||Q(A)Q(B)||_F\n"
       << "forward_error = ||C - A_fp32 B_fp32||_F / ||A_fp32 B_fp32||_F\n";
 }
-} // namespace
+}  // namespace
 
 int main(int ac, char **av) {
   auto *pool = NS::AutoreleasePool::alloc()->init();

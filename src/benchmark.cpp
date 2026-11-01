@@ -49,10 +49,10 @@ TimingSummary summarizeTimingSamples(std::vector<double> samples,
   };
 }
 
-PairedRatioSummary
-summarizePairedRatios(const std::vector<double> &mixed_samples,
-                      const std::vector<double> &reference_samples,
-                      size_t expected_count, std::vector<double> &ratios) {
+PairedRatioSummary summarizePairedRatios(
+    const std::vector<double> &mixed_samples,
+    const std::vector<double> &reference_samples, size_t expected_count,
+    std::vector<double> &ratios) {
   if (mixed_samples.size() != expected_count ||
       reference_samples.size() != expected_count || expected_count == 0) {
     fail("Paired timing sample count does not match the evaluation count.");
@@ -136,4 +136,4 @@ int runAccelerateSweep(const std::vector<size_t> &orders,
   return EXIT_SUCCESS;
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

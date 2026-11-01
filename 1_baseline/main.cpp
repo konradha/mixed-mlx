@@ -87,10 +87,9 @@ void print_medians(const std::vector<msqrt::Run> &runs) {
             << "error" << std::setw(13) << "residual" << std::setw(12)
             << "median_ms" << '\n';
   for (auto &[key, values] : groups) {
-    const msqrt::Run &run =
-        *msqrt::common::median_run(values, [](const msqrt::Run *item) {
-          return item->times.total_seconds;
-        });
+    const msqrt::Run &run = *msqrt::common::median_run(
+        values,
+        [](const msqrt::Run *item) { return item->times.total_seconds; });
     const msqrt::Step &last = run.steps.back();
     const double median = 1.0e3 * run.times.total_seconds;
     std::cout << std::left << std::setw(18) << run.backend << std::setw(18)
@@ -137,7 +136,7 @@ void execute_once(msqrt::Metal &metal, const msqrt::Problem &problem,
   }
 }
 
-} // namespace
+}  // namespace
 
 int main(int argc, char **argv) {
   try {

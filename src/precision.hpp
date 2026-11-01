@@ -150,4 +150,4 @@ void validateCorrectionMode(CorrectionMode mode, Precision basis_precision,
                             Precision spectrum_precision,
                             KernelPath kernel_path);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

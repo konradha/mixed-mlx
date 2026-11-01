@@ -327,4 +327,4 @@ std::string conditionLabel(double condition) {
   return label;
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

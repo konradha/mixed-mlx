@@ -17,10 +17,10 @@ std::string error_text(NS::Error *error) {
                           : error->localizedDescription()->utf8String();
 }
 
-} // namespace
+}  // namespace
 
 class Metal::Impl {
-public:
+ public:
   explicit Impl(const std::string &path) {
     device = MTL::CreateSystemDefaultDevice();
     if (device == nullptr) {
@@ -139,4 +139,4 @@ void release_buffers(std::vector<MTL::Buffer *> &buffers) {
   buffers.clear();
 }
 
-} // namespace msqrt
+}  // namespace msqrt

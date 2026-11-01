@@ -214,12 +214,14 @@ int runApplication(int argc, char **argv) {
   }
   if (rounding_mode == RoundingMode::Stochastic &&
       correction_mode == CorrectionMode::NativeQuantized) {
-    fail("Stochastic rounding supports frozen-factor quantization with FP32 "
-         "correction. It does not support native quantized correction.");
+    fail(
+        "Stochastic rounding supports frozen-factor quantization with FP32 "
+        "correction. It does not support native quantized correction.");
   }
   if (codec_check && rounding_mode == RoundingMode::Stochastic) {
-    fail("Use --rounding stochastic --kernel-check for the GPU rounding "
-         "check.");
+    fail(
+        "Use --rounding stochastic --kernel-check for the GPU rounding "
+        "check.");
   }
   if (codec_check) {
     if (sweep || !positional.empty()) {
@@ -315,4 +317,4 @@ int runApplication(int argc, char **argv) {
   return runMetal(metal_options, paper_matrix_pointer);
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

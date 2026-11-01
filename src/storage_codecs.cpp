@@ -202,13 +202,13 @@ void checkLowPrecisionCodecs() {
                        std::isnan(fp8E4M3FnToFloat(floatToFp8E4M3Fn(
                            std::numeric_limits<float>::quiet_NaN()))),
                    "FP8 E4M3FN codec check failed.");
-  requireCondition(floatToFp8E5M2(std::numeric_limits<float>::infinity()) ==
-                           0x7cu &&
-                       std::isinf(fp8E5M2ToFloat(0x7cu)),
-                   "FP8 E5M2 codec check failed.");
-  requireCondition(floatToFp8E4M3Fn(1.0625f) == 0x38u &&
-                       floatToFp8E4M3Fn(1.1875f) == 0x3au,
-                   "FP8 round-to-nearest-even check failed.");
+  requireCondition(
+      floatToFp8E5M2(std::numeric_limits<float>::infinity()) == 0x7cu &&
+          std::isinf(fp8E5M2ToFloat(0x7cu)),
+      "FP8 E5M2 codec check failed.");
+  requireCondition(
+      floatToFp8E4M3Fn(1.0625f) == 0x38u && floatToFp8E4M3Fn(1.1875f) == 0x3au,
+      "FP8 round-to-nearest-even check failed.");
 
   std::vector<float> fp4_values(33, 0.0f);
   fp4_values.front() = 6.1f;
@@ -230,10 +230,10 @@ void checkLowPrecisionCodecs() {
   auto e4m3_value_at = [&](size_t index) { return e4m3_values[index]; };
   packMxfp8(33, e4m3_value_at, e4m3_storage.data(), e4m3_scales.data(), 8,
             floatToFp8E4M3Fn);
-  requireCondition(e4m3_scales[0] == 128u && e4m3_scales[1] == 127u &&
-                       std::ldexp(fp8E4M3FnToFloat(e4m3_storage[0]), 1) ==
-                           512.0f,
-                   "MXFP8 E4M3FN block scale check failed.");
+  requireCondition(
+      e4m3_scales[0] == 128u && e4m3_scales[1] == 127u &&
+          std::ldexp(fp8E4M3FnToFloat(e4m3_storage[0]), 1) == 512.0f,
+      "MXFP8 E4M3FN block scale check failed.");
 
   std::vector<float> e5m2_values(32, 1.0f);
   std::vector<uint8_t> e5m2_storage(32);
@@ -251,64 +251,64 @@ void copyValuesToStorage(const PrecisionSpec &precision, size_t elements,
                          ValueAt &&value_at, MTL::Buffer *destination,
                          MTL::Buffer *scale_destination) {
   switch (precision.host_storage) {
-  case HostStorageCodec::Fp32: {
-    float *values = static_cast<float *>(destination->contents());
-    for (size_t index = 0; index < elements; ++index) {
-      values[index] = value_at(index);
+    case HostStorageCodec::Fp32: {
+      float *values = static_cast<float *>(destination->contents());
+      for (size_t index = 0; index < elements; ++index) {
+        values[index] = value_at(index);
+      }
+      return;
     }
-    return;
-  }
-  case HostStorageCodec::Bf16: {
-    uint16_t *values = static_cast<uint16_t *>(destination->contents());
-    for (size_t index = 0; index < elements; ++index) {
-      values[index] = floatToBf16(value_at(index));
+    case HostStorageCodec::Bf16: {
+      uint16_t *values = static_cast<uint16_t *>(destination->contents());
+      for (size_t index = 0; index < elements; ++index) {
+        values[index] = floatToBf16(value_at(index));
+      }
+      return;
     }
-    return;
-  }
-  case HostStorageCodec::Fp8E4M3Fn: {
-    uint8_t *values = static_cast<uint8_t *>(destination->contents());
-    for (size_t index = 0; index < elements; ++index) {
-      values[index] = floatToFp8E4M3Fn(value_at(index));
+    case HostStorageCodec::Fp8E4M3Fn: {
+      uint8_t *values = static_cast<uint8_t *>(destination->contents());
+      for (size_t index = 0; index < elements; ++index) {
+        values[index] = floatToFp8E4M3Fn(value_at(index));
+      }
+      return;
     }
-    return;
-  }
-  case HostStorageCodec::Fp8E5M2: {
-    uint8_t *values = static_cast<uint8_t *>(destination->contents());
-    for (size_t index = 0; index < elements; ++index) {
-      values[index] = floatToFp8E5M2(value_at(index));
+    case HostStorageCodec::Fp8E5M2: {
+      uint8_t *values = static_cast<uint8_t *>(destination->contents());
+      for (size_t index = 0; index < elements; ++index) {
+        values[index] = floatToFp8E5M2(value_at(index));
+      }
+      return;
     }
-    return;
-  }
-  case HostStorageCodec::Mxfp8E4M3Fn:
-    if (scale_destination == nullptr) {
-      fail("MXFP8 E4M3FN storage requires a scale plane.");
-    }
-    packMxfp8(elements, std::forward<ValueAt>(value_at),
-              static_cast<uint8_t *>(destination->contents()),
-              static_cast<uint8_t *>(scale_destination->contents()), 8,
-              floatToFp8E4M3Fn);
-    return;
-  case HostStorageCodec::Mxfp8E5M2:
-    if (scale_destination == nullptr) {
-      fail("MXFP8 E5M2 storage requires a scale plane.");
-    }
-    packMxfp8(elements, std::forward<ValueAt>(value_at),
-              static_cast<uint8_t *>(destination->contents()),
-              static_cast<uint8_t *>(scale_destination->contents()), 15,
-              floatToFp8E5M2);
-    return;
-  case HostStorageCodec::Fp4E2M1:
-    packFp4(elements, std::forward<ValueAt>(value_at),
-            static_cast<uint8_t *>(destination->contents()));
-    return;
-  case HostStorageCodec::Mxfp4E2M1:
-    if (scale_destination == nullptr) {
-      fail("MXFP4 storage requires a scale plane.");
-    }
-    packMxfp4(elements, std::forward<ValueAt>(value_at),
-              static_cast<uint8_t *>(destination->contents()),
-              static_cast<uint8_t *>(scale_destination->contents()));
-    return;
+    case HostStorageCodec::Mxfp8E4M3Fn:
+      if (scale_destination == nullptr) {
+        fail("MXFP8 E4M3FN storage requires a scale plane.");
+      }
+      packMxfp8(elements, std::forward<ValueAt>(value_at),
+                static_cast<uint8_t *>(destination->contents()),
+                static_cast<uint8_t *>(scale_destination->contents()), 8,
+                floatToFp8E4M3Fn);
+      return;
+    case HostStorageCodec::Mxfp8E5M2:
+      if (scale_destination == nullptr) {
+        fail("MXFP8 E5M2 storage requires a scale plane.");
+      }
+      packMxfp8(elements, std::forward<ValueAt>(value_at),
+                static_cast<uint8_t *>(destination->contents()),
+                static_cast<uint8_t *>(scale_destination->contents()), 15,
+                floatToFp8E5M2);
+      return;
+    case HostStorageCodec::Fp4E2M1:
+      packFp4(elements, std::forward<ValueAt>(value_at),
+              static_cast<uint8_t *>(destination->contents()));
+      return;
+    case HostStorageCodec::Mxfp4E2M1:
+      if (scale_destination == nullptr) {
+        fail("MXFP4 storage requires a scale plane.");
+      }
+      packMxfp4(elements, std::forward<ValueAt>(value_at),
+                static_cast<uint8_t *>(destination->contents()),
+                static_cast<uint8_t *>(scale_destination->contents()));
+      return;
   }
 }
 
@@ -323,64 +323,64 @@ void copyToStorage(const PrecisionSpec &precision,
 float storageValueAt(const PrecisionSpec &precision, MTL::Buffer *source,
                      MTL::Buffer *scale_source, size_t index) {
   switch (precision.host_storage) {
-  case HostStorageCodec::Fp32:
-    return static_cast<const float *>(source->contents())[index];
-  case HostStorageCodec::Bf16:
-    return bf16ToFloat(
-        static_cast<const uint16_t *>(source->contents())[index]);
-  case HostStorageCodec::Fp8E4M3Fn:
-    return fp8E4M3FnToFloat(
-        static_cast<const uint8_t *>(source->contents())[index]);
-  case HostStorageCodec::Fp8E5M2:
-    return fp8E5M2ToFloat(
-        static_cast<const uint8_t *>(source->contents())[index]);
-  case HostStorageCodec::Mxfp8E4M3Fn: {
-    if (scale_source == nullptr) {
-      fail("MXFP8 E4M3FN storage requires a scale plane.");
+    case HostStorageCodec::Fp32:
+      return static_cast<const float *>(source->contents())[index];
+    case HostStorageCodec::Bf16:
+      return bf16ToFloat(
+          static_cast<const uint16_t *>(source->contents())[index]);
+    case HostStorageCodec::Fp8E4M3Fn:
+      return fp8E4M3FnToFloat(
+          static_cast<const uint8_t *>(source->contents())[index]);
+    case HostStorageCodec::Fp8E5M2:
+      return fp8E5M2ToFloat(
+          static_cast<const uint8_t *>(source->contents())[index]);
+    case HostStorageCodec::Mxfp8E4M3Fn: {
+      if (scale_source == nullptr) {
+        fail("MXFP8 E4M3FN storage requires a scale plane.");
+      }
+      const uint8_t scale =
+          static_cast<const uint8_t *>(scale_source->contents())[index / 32];
+      return std::ldexp(fp8E4M3FnToFloat(static_cast<const uint8_t *>(
+                            source->contents())[index]),
+                        static_cast<int>(scale) - 127);
     }
-    const uint8_t scale =
-        static_cast<const uint8_t *>(scale_source->contents())[index / 32];
-    return std::ldexp(fp8E4M3FnToFloat(static_cast<const uint8_t *>(
-                          source->contents())[index]),
-                      static_cast<int>(scale) - 127);
-  }
-  case HostStorageCodec::Mxfp8E5M2: {
-    if (scale_source == nullptr) {
-      fail("MXFP8 E5M2 storage requires a scale plane.");
+    case HostStorageCodec::Mxfp8E5M2: {
+      if (scale_source == nullptr) {
+        fail("MXFP8 E5M2 storage requires a scale plane.");
+      }
+      const uint8_t scale =
+          static_cast<const uint8_t *>(scale_source->contents())[index / 32];
+      return std::ldexp(fp8E5M2ToFloat(static_cast<const uint8_t *>(
+                            source->contents())[index]),
+                        static_cast<int>(scale) - 127);
     }
-    const uint8_t scale =
-        static_cast<const uint8_t *>(scale_source->contents())[index / 32];
-    return std::ldexp(
-        fp8E5M2ToFloat(static_cast<const uint8_t *>(source->contents())[index]),
-        static_cast<int>(scale) - 127);
-  }
-  case HostStorageCodec::Fp4E2M1: {
-    const uint8_t packed =
-        static_cast<const uint8_t *>(source->contents())[index / 2];
-    return fp4E2M1ToFloat((packed >> ((index & 1u) * 4)) & 0x0fu);
-  }
-  case HostStorageCodec::Mxfp4E2M1: {
-    if (scale_source == nullptr) {
-      fail("MXFP4 storage requires a scale plane.");
+    case HostStorageCodec::Fp4E2M1: {
+      const uint8_t packed =
+          static_cast<const uint8_t *>(source->contents())[index / 2];
+      return fp4E2M1ToFloat((packed >> ((index & 1u) * 4)) & 0x0fu);
     }
-    const uint8_t packed =
-        static_cast<const uint8_t *>(source->contents())[index / 2];
-    const uint8_t value = (packed >> ((index & 1u) * 4)) & 0x0fu;
-    const uint8_t scale =
-        static_cast<const uint8_t *>(scale_source->contents())[index / 32];
-    return std::ldexp(fp4E2M1ToFloat(value), static_cast<int>(scale) - 127);
-  }
+    case HostStorageCodec::Mxfp4E2M1: {
+      if (scale_source == nullptr) {
+        fail("MXFP4 storage requires a scale plane.");
+      }
+      const uint8_t packed =
+          static_cast<const uint8_t *>(source->contents())[index / 2];
+      const uint8_t value = (packed >> ((index & 1u) * 4)) & 0x0fu;
+      const uint8_t scale =
+          static_cast<const uint8_t *>(scale_source->contents())[index / 32];
+      return std::ldexp(fp4E2M1ToFloat(value), static_cast<int>(scale) - 127);
+    }
   }
 }
 
 float maximumFiniteStorageValue(const PrecisionSpec &precision) {
   switch (precision.host_storage) {
-  case HostStorageCodec::Fp8E4M3Fn:
-    return 448.0f;
-  case HostStorageCodec::Fp4E2M1:
-    return 6.0f;
-  default:
-    fail("Log-spectrum storage requires a finite scalar FP8 or FP4 codec.");
+    case HostStorageCodec::Fp8E4M3Fn:
+      return 448.0f;
+    case HostStorageCodec::Fp4E2M1:
+      return 6.0f;
+    default:
+      fail("Log-spectrum storage requires a finite scalar FP8 or FP4 codec.");
   }
 }
 
@@ -512,4 +512,4 @@ double orthogonalityError(const PrecisionSpec &precision,
   return std::sqrt(difference_squared / identity_squared);
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

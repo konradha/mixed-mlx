@@ -6,4 +6,4 @@ class MetalRuntime;
 
 void runMetalKernelChecks(MetalRuntime &metal);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

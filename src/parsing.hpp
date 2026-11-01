@@ -13,4 +13,4 @@ double parseNonnegativeFiniteDouble(const std::string &text,
 std::vector<size_t> parseOrders(const std::string &text);
 std::vector<double> parseConditions(const std::string &text);
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

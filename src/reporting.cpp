@@ -14,7 +14,8 @@ double updatesAndOthersSeconds(const CaseResult &result) {
   return std::max(0.0, result.times.mixed_total_seconds - accounted);
 }
 
-template <typename... Values> void printLine(Values &&...values) {
+template <typename... Values>
+void printLine(Values &&...values) {
   (std::cout << ... << std::forward<Values>(values)) << '\n';
 }
 
@@ -326,4 +327,4 @@ void writeIterationsHeader(std::ofstream &output) {
       << "iteration,residual,forward_error\n";
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

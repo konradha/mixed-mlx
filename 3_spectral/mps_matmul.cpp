@@ -20,7 +20,9 @@ Result message(Object object, const char *selector, Args... args) {
   return function(object, sel_registerName(selector), args...);
 }
 
-Object object(const void *value) { return const_cast<void *>(value); }
+Object object(const void *value) {
+  return const_cast<void *>(value);
+}
 
 Object class_object(const char *name) {
   return reinterpret_cast<Object>(objc_getClass(name));
@@ -32,10 +34,10 @@ Object make_matrix(Object buffer, Object descriptor) {
                          descriptor);
 }
 
-} // namespace
+}  // namespace
 
 class MpsMatmul::Impl {
-public:
+ public:
   Object descriptor = nullptr;
   Object kernel = nullptr;
 };
@@ -81,4 +83,4 @@ void MpsMatmul::encode(MTL::CommandBuffer *command, MTL::Buffer *left,
   message<void>(left_matrix, "release");
 }
 
-} // namespace msqrt
+}  // namespace msqrt

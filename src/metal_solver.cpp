@@ -89,10 +89,12 @@ std::vector<double> readWorkingMatrix(MTL::Buffer *buffer, size_t elements) {
   return result;
 }
 
-GpuResidentSpdResult
-solveGpuResidentSpd(MetalRuntime &metal, const std::vector<double> &matrix,
-                    Precision basis_precision, Precision spectrum_precision,
-                    uint32_t order, size_t max_iterations, double tolerance) {
+GpuResidentSpdResult solveGpuResidentSpd(MetalRuntime &metal,
+                                         const std::vector<double> &matrix,
+                                         Precision basis_precision,
+                                         Precision spectrum_precision,
+                                         uint32_t order, size_t max_iterations,
+                                         double tolerance) {
   const size_t elements = checkedElementCount(order, order);
   if (matrix.size() != elements ||
       elements > std::numeric_limits<uint32_t>::max()) {
@@ -404,8 +406,9 @@ CaseResult runMetalCase(MetalRuntime &metal,
         prepared_matrix->values.size() != matrix_elements ||
         prepared_matrix->matrix_type != "symmetric" ||
         !allFinite(prepared_matrix->values)) {
-      fail("Metal requires a finite prepared symmetric matrix of the selected "
-           "order.");
+      fail(
+          "Metal requires a finite prepared symmetric matrix of the selected "
+          "order.");
     }
     result.paper_test_set = prepared_matrix->paper_test_set;
     result.matrix_family = prepared_matrix->matrix_family;
@@ -1087,4 +1090,4 @@ CaseResult runTimedMetalCase(MetalRuntime &metal,
   return result;
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

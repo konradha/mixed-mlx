@@ -18,4 +18,4 @@ double elapsedSeconds(const Clock::time_point &start) {
   return std::chrono::duration<double>(Clock::now() - start).count();
 }
 
-} // namespace mixed_sqrt
+}  // namespace mixed_sqrt

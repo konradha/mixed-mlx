@@ -7,10 +7,9 @@
 
 namespace msqrt::common {
 
-// Owns Metal buffers for one measurement. Destructor releases all.
-// Throws leave no buffers behind. No null entries: make throws on failure.
-template <typename Metal> class BufferGuard {
-public:
+template <typename Metal>
+class BufferGuard {
+ public:
   explicit BufferGuard(Metal &metal) : metal_(metal) {}
   ~BufferGuard() {
     for (MTL::Buffer *buffer : buffers_) {
@@ -28,9 +27,9 @@ public:
 
   const std::vector<MTL::Buffer *> &buffers() const { return buffers_; }
 
-private:
+ private:
   Metal &metal_;
   std::vector<MTL::Buffer *> buffers_;
 };
 
-} // namespace msqrt::common
+}  // namespace msqrt::common
