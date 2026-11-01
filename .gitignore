@@ -28,7 +28,6 @@ README*
 !/third_party/metal-cpp/Metal/
 !/third_party/metal-cpp/LICENSE.txt
 
-!/README.md
 !/LICENSE
 !/plot_article_showcase.py
 !/.clang-format
